@@ -1,0 +1,23 @@
+export interface Comment {
+    userid: string;
+    text: string;
+    date: string;
+    recommend: number;
+}
+export interface CommentList {
+    id?: string;
+    [commentid: string]: Comment | string;
+}
+export declare type LikeKind = 'like' | 'love' | 'wow' | 'angry' | 'funny';
+export interface Like {
+    date: string;
+    kind: LikeKind;
+}
+export interface LikeList {
+    id?: string;
+    [userid: string]: Like | string;
+}
+export interface UserLikes {
+    id?: string;
+    [aid: string]: Like | string;
+}
