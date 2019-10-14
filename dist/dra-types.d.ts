@@ -21,3 +21,13 @@ export interface UserLikes {
     id?: string;
     [aid: string]: Like | string;
 }
+export interface SplitBlock {
+    id?: string;
+    state: string;
+    datasource: string;
+    geoid: string;
+    blocks: string[];
+}
+export declare type DistrictToSplitBlock = {
+    [nDistrict: number]: SplitBlock;
+};

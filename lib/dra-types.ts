@@ -37,3 +37,14 @@ export interface UserLikes
   id?: string;
   [aid: string]: Like | string;     // Really just Like but make TypeScript happy
 }
+
+export interface SplitBlock
+{
+  id?: string;
+  state: string;
+  datasource: string;
+  geoid: string;
+  blocks: string[];
+}
+
+export type DistrictToSplitBlock = { [nDistrict: number]: SplitBlock };
