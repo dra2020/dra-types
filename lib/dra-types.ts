@@ -47,4 +47,4 @@ export interface SplitBlock
   blocks: string[];
 }
 
-export type DistrictToSplitBlock = { [nDistrict: number]: SplitBlock };
+export type DistrictToSplitBlock = { [nDistrict: number]: SplitBlock[] };

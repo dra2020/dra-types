@@ -29,5 +29,5 @@ export interface SplitBlock {
     blocks: string[];
 }
 export declare type DistrictToSplitBlock = {
-    [nDistrict: number]: SplitBlock;
+    [nDistrict: number]: SplitBlock[];
 };
