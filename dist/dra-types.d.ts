@@ -23,6 +23,7 @@ export interface UserLikes {
 }
 export interface SplitBlock {
     id?: string;
+    chunk?: string;
     state: string;
     datasource: string;
     geoid: string;
