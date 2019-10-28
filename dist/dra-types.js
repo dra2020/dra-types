@@ -105,7 +105,51 @@ return /******/ (function(modules) { // webpackBootstrap
 
 "use strict";
 
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
 Object.defineProperty(exports, "__esModule", { value: true });
+__export(__webpack_require__(/*! ./dra-types */ "./lib/dra-types.ts"));
+
+
+/***/ }),
+
+/***/ "./lib/dra-types.ts":
+/*!**************************!*\
+  !*** ./lib/dra-types.ts ***!
+  \**************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+function vgeoidToGeoid(vgeoid) {
+    let re = /vfeature_([^_]*)_.*/;
+    let a = re.exec(vgeoid);
+    if (a == null || a.length != 2)
+        return '';
+    else
+        return a[1];
+}
+exports.vgeoidToGeoid = vgeoidToGeoid;
+function vgeoidToChunk(vgeoid) {
+    // vgeoid is string of form: "vfeature_[geoid]_[chunkid]_[hash]"
+    // the contents are chunked into a file of form "vfeature_chunk_[chunkid]"
+    // So extract the chunk ID and download that.
+    let re = /vfeature_([^_]*)_([^_*])_(.*)/;
+    let a = re.exec(vgeoid);
+    if (a && a.length == 4)
+        vgeoid = `vfeature_chunk_${a[2]}`;
+    else
+        vgeoid = null;
+    return vgeoid;
+}
+exports.vgeoidToChunk = vgeoidToChunk;
+function isVfeature(geoid) {
+    return geoid.indexOf('vfeature') === 0;
+}
+exports.isVfeature = isVfeature;
 
 
 /***/ })

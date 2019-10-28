@@ -32,3 +32,6 @@ export interface SplitBlock {
 export declare type DistrictToSplitBlock = {
     [nDistrict: number]: SplitBlock[];
 };
+export declare function vgeoidToGeoid(vgeoid: string): string;
+export declare function vgeoidToChunk(vgeoid: string): string;
+export declare function isVfeature(geoid: string): boolean;
