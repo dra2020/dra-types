@@ -124,3 +124,8 @@ export function splitToPrefix(s: SplitBlock): string
   }
   return `_${s.state}_${s.datasource}`;
 }
+
+export function cacheKeysToChunkHash(keys: string[]): string
+{
+  return hash(keys);
+}

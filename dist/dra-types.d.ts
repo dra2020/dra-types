@@ -38,3 +38,4 @@ export declare function isVfeature(geoid: string): boolean;
 export declare function splitToCacheKey(s: SplitBlock): string;
 export declare function splitToChunkKey(s: SplitBlock): string;
 export declare function splitToPrefix(s: SplitBlock): string;
+export declare function cacheKeysToChunkHash(keys: string[]): string;
