@@ -1,3 +1,6 @@
+// Public libraries
+import * as Hash from 'object-hash';
+
 // Type for single comment
 export interface Comment
 {
@@ -50,6 +53,17 @@ export interface SplitBlock
 
 export type DistrictToSplitBlock = { [nDistrict: number]: SplitBlock[] };
 
+// Canonical hashing of splitblock data
+function hash(o: any): string
+{
+  return Hash(o,
+    { respectType: false,
+      unorderedArrays: true,
+      unorderedObjects: true,
+      excludeKeys: (k: string) => (k === 'id' || k === 'chunk')
+    });
+}
+
 export function vgeoidToGeoid(vgeoid: string): string
 {
   let re = /vfeature_([^_]*)_.*/;
@@ -78,4 +92,35 @@ export function vgeoidToChunk(vgeoid: string): string
 export function isVfeature(geoid: string): boolean
 {
   return geoid.indexOf('vfeature') === 0;
+}
+
+export function splitToCacheKey(s: SplitBlock): string
+{
+  if (s.id === undefined)
+    s.id = hash(s);
+  if (s.chunk === undefined)
+    s.chunk = "0";
+
+  return `_${s.state}_${s.datasource}_vfeature_${s.geoid}_${s.chunk}_${s.id}.geojson`;
+}
+
+export function splitToChunkKey(s: SplitBlock): string
+{
+  if (s.chunk === undefined)
+    s.chunk = "0";
+
+  return `_${s.state}_${s.datasource}_vfeature_chunk_${s.chunk}.geojson`;
+}
+
+export function splitToPrefix(s: SplitBlock): string
+{
+  if (s.blocks === undefined)
+  {
+    let re = /_([^_]*)_(.*)_vfeature.*\.geojson$/;
+    let a = re.exec(s.id);
+    if (a && a.length == 3)
+      return `_${a[1]}_${a[2]}`;
+    return s.id;
+  }
+  return `_${s.state}_${s.datasource}`;
 }
