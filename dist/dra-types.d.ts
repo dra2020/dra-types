@@ -30,7 +30,7 @@ export interface SplitBlock {
     blocks: string[];
 }
 export declare type DistrictToSplitBlock = {
-    [nDistrict: number]: SplitBlock[];
+    [districtID: string]: SplitBlock[];
 };
 export declare function vgeoidToGeoid(vgeoid: string): string;
 export declare function vgeoidToChunk(vgeoid: string): string;

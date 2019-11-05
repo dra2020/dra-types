@@ -51,7 +51,7 @@ export interface SplitBlock
   blocks: string[];
 }
 
-export type DistrictToSplitBlock = { [nDistrict: number]: SplitBlock[] };
+export type DistrictToSplitBlock = { [districtID: string]: SplitBlock[] };
 
 // Canonical hashing of splitblock data
 function hash(o: any): string
