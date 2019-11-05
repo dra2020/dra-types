@@ -129,3 +129,13 @@ export function cacheKeysToChunkHash(keys: string[]): string
 {
   return hash(keys);
 }
+
+let reDistrictNumber = /^\d+$/;
+
+export function canonicalDistrictID(districtID: string): string
+{
+  // Normalize purely numeric values (e.g. 001)
+  if (reDistrictNumber.test(districtID))
+    return String(Number(districtID));
+  return districtID;
+}

@@ -189,6 +189,14 @@ function cacheKeysToChunkHash(keys) {
     return hash(keys);
 }
 exports.cacheKeysToChunkHash = cacheKeysToChunkHash;
+let reDistrictNumber = /^\d+$/;
+function canonicalDistrictID(districtID) {
+    // Normalize purely numeric values (e.g. 001)
+    if (reDistrictNumber.test(districtID))
+        return String(Number(districtID));
+    return districtID;
+}
+exports.canonicalDistrictID = canonicalDistrictID;
 
 
 /***/ }),
