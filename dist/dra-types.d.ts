@@ -40,3 +40,7 @@ export declare function splitToChunkKey(s: SplitBlock): string;
 export declare function splitToPrefix(s: SplitBlock): string;
 export declare function cacheKeysToChunkHash(keys: string[]): string;
 export declare function canonicalDistrictID(districtID: string): string;
+export declare type DistrictOrder = {
+    [districtID: string]: number;
+};
+export declare function canonicalDistrictIDOrdering(order: DistrictOrder): DistrictOrder;

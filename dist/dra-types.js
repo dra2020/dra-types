@@ -190,6 +190,7 @@ function cacheKeysToChunkHash(keys) {
 }
 exports.cacheKeysToChunkHash = cacheKeysToChunkHash;
 let reDistrictNumber = /^\d+$/;
+let reDistrictNumeric = /^\d/;
 function canonicalDistrictID(districtID) {
     // Normalize purely numeric values (e.g. 001)
     if (reDistrictNumber.test(districtID))
@@ -197,6 +198,32 @@ function canonicalDistrictID(districtID) {
     return districtID;
 }
 exports.canonicalDistrictID = canonicalDistrictID;
+function canonicalDistrictIDOrdering(order) {
+    let keys = Object.keys(order);
+    let i;
+    for (i = 0; i < keys.length; i++) {
+        let s = keys[i];
+        if (reDistrictNumeric.test(s)) {
+            switch (s.length) {
+                case 1:
+                    keys[i] = `000${s}`;
+                    break;
+                case 2:
+                    keys[i] = `00${s}`;
+                    break;
+                case 3:
+                    keys[i] = `0${s}`;
+                    break;
+            }
+        }
+    }
+    keys.sort();
+    order = {};
+    for (i = 0; i < keys.length; i++)
+        order[canonicalDistrictID(keys[i])] = i + 1;
+    return order;
+}
+exports.canonicalDistrictIDOrdering = canonicalDistrictIDOrdering;
 
 
 /***/ }),
