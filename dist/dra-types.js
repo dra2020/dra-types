@@ -189,38 +189,93 @@ function cacheKeysToChunkHash(keys) {
     return hash(keys);
 }
 exports.cacheKeysToChunkHash = cacheKeysToChunkHash;
+let reNumeric = /^(\D*)(\d*)(\D*)$/;
 let reDistrictNumber = /^\d+$/;
 let reDistrictNumeric = /^\d/;
+let reLeadingZero = /^0+(.*)/;
+// Normalize any numeric part to have no padded leading zeros
 function canonicalDistrictID(districtID) {
-    // Normalize purely numeric values (e.g. 001)
-    if (reDistrictNumber.test(districtID))
-        return String(Number(districtID));
+    let a = reNumeric.exec(districtID);
+    if (a && a.length == 4) {
+        if (a[2].length > 0)
+            a[2] = String(Number(a[2]));
+        districtID = `${a[1]}${a[2]}${a[3]}`;
+    }
     return districtID;
 }
 exports.canonicalDistrictID = canonicalDistrictID;
+// Normalize any numeric part to have four digits with padded leading zeros
+function canonicalSortingDistrictID(districtID) {
+    let a = reNumeric.exec(districtID);
+    if (a && a.length == 4) {
+        let s = a[2];
+        if (s.length > 0) {
+            switch (s.length) {
+                case 1:
+                    s = `000${s}`;
+                    break;
+                case 2:
+                    s = `00${s}`;
+                    break;
+                case 3:
+                    s = `0${s}`;
+                    break;
+            }
+            a[2] = s;
+        }
+        districtID = `${a[1]}${a[2]}${a[3]}`;
+    }
+    return districtID;
+}
+exports.canonicalSortingDistrictID = canonicalSortingDistrictID;
+// Return numeric part of districtID (or -1 if there is none)
+function canonicalNumericFromDistrictID(districtID) {
+    let a = reNumeric.exec(districtID);
+    if (a && a.length == 4) {
+        let s = a[2];
+        if (s.length > 0)
+            return Number(s);
+    }
+    return -1;
+}
+exports.canonicalNumericFromDistrictID = canonicalNumericFromDistrictID;
+function canonicalDistrictIDFromNumber(districtID, n) {
+    let a = reNumeric.exec(districtID);
+    if (a && a.length == 4) {
+        a[2] = String(n);
+        districtID = `${a[1]}${a[2]}${a[3]}`;
+    }
+    else
+        districtID = String(n);
+    return districtID;
+}
+exports.canonicalDistrictIDFromNumber = canonicalDistrictIDFromNumber;
 function canonicalDistrictIDOrdering(order) {
     let keys = Object.keys(order);
     let i;
+    let a = [];
+    let template = undefined;
     for (i = 0; i < keys.length; i++) {
         let s = keys[i];
-        if (reDistrictNumeric.test(s)) {
-            switch (s.length) {
-                case 1:
-                    keys[i] = `000${s}`;
-                    break;
-                case 2:
-                    keys[i] = `00${s}`;
-                    break;
-                case 3:
-                    keys[i] = `0${s}`;
-                    break;
-            }
+        keys[i] = canonicalSortingDistrictID(s);
+        let n = canonicalNumericFromDistrictID(s);
+        if (n > 0) {
+            if (template === undefined)
+                template = s;
+            a[n] = true;
         }
+    }
+    if (template !== undefined) {
+        for (i = 1; i < a.length; i++)
+            if (a[i] === undefined)
+                keys.push(canonicalDistrictIDFromNumber(template, i));
     }
     keys.sort();
     order = {};
     for (i = 0; i < keys.length; i++)
         order[canonicalDistrictID(keys[i])] = i + 1;
+    if (order['ZZZ'])
+        delete order['ZZZ'];
     return order;
 }
 exports.canonicalDistrictIDOrdering = canonicalDistrictIDOrdering;

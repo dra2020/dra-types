@@ -30,7 +30,7 @@ export interface SplitBlock {
     blocks: string[];
 }
 export declare type DistrictToSplitBlock = {
-    [nDistrict: number]: SplitBlock[];
+    [districtID: string]: SplitBlock[];
 };
 export declare function vgeoidToGeoid(vgeoid: string): string;
 export declare function vgeoidToChunk(vgeoid: string): string;
@@ -40,6 +40,9 @@ export declare function splitToChunkKey(s: SplitBlock): string;
 export declare function splitToPrefix(s: SplitBlock): string;
 export declare function cacheKeysToChunkHash(keys: string[]): string;
 export declare function canonicalDistrictID(districtID: string): string;
+export declare function canonicalSortingDistrictID(districtID: string): string;
+export declare function canonicalNumericFromDistrictID(districtID: string): number;
+export declare function canonicalDistrictIDFromNumber(districtID: string, n: number): string;
 export declare type DistrictOrder = {
     [districtID: string]: number;
 };
