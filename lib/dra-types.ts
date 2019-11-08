@@ -89,6 +89,19 @@ export function vgeoidToChunk(vgeoid: string): string
   return vgeoid;
 }
 
+export function vgeoidToHash(vgeoid: string): string
+{
+  // vgeoid is string of form: "vfeature_[geoid]_[chunkid]_[hash]"
+  let re = /vfeature_([^_]*)_([^_*])_(.*)/;
+  let a = re.exec(vgeoid);
+  if (a && a.length == 4)
+    vgeoid = a[3];
+  else
+    vgeoid = null;
+
+  return vgeoid;
+}
+
 export function isVfeature(geoid: string): boolean
 {
   return geoid.indexOf('vfeature') === 0;

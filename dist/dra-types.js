@@ -156,6 +156,17 @@ function vgeoidToChunk(vgeoid) {
     return vgeoid;
 }
 exports.vgeoidToChunk = vgeoidToChunk;
+function vgeoidToHash(vgeoid) {
+    // vgeoid is string of form: "vfeature_[geoid]_[chunkid]_[hash]"
+    let re = /vfeature_([^_]*)_([^_*])_(.*)/;
+    let a = re.exec(vgeoid);
+    if (a && a.length == 4)
+        vgeoid = a[3];
+    else
+        vgeoid = null;
+    return vgeoid;
+}
+exports.vgeoidToHash = vgeoidToHash;
 function isVfeature(geoid) {
     return geoid.indexOf('vfeature') === 0;
 }
