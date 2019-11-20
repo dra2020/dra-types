@@ -146,7 +146,6 @@ export function cacheKeysToChunkHash(keys: string[]): string
 let reNumeric = /^(\D*)(\d*)(\D*)$/;
 let reDistrictNumber = /^\d+$/;
 let reDistrictNumeric = /^\d/;
-let reLeadingZero = /^0+(.*)/;
 
 // Normalize any numeric part to have no padded leading zeros
 export function canonicalDistrictID(districtID: string): string
@@ -219,29 +218,15 @@ export function canonicalDistrictIDOrdering(order: DistrictOrder): DistrictOrder
   let a: any = [];
   let template: string = undefined;
 
-  for (i = 0; i < keys.length; i++)
-  {
-    let s = keys[i];
-    keys[i] = canonicalSortingDistrictID(s);
-    let n = canonicalNumericFromDistrictID(s);
-    if (n > 0)
-    {
-      if (template === undefined)
-        template = s;
-      a[n] = true;
-    }
-  }
-  if (template !== undefined)
-  {
-    for (i = 1; i < a.length; i++)
-      if (a[i] === undefined)
-        keys.push(canonicalDistrictIDFromNumber(template, i));
-  }
+  keys = keys.map((s: string) => canonicalSortingDistrictID(s));
   keys.sort();
   order = {};
   for (i = 0; i < keys.length; i++)
     order[canonicalDistrictID(keys[i])] = i+1;
+
+  // Remove water districts
   if (order['ZZZ'])
     delete order['ZZZ'];
+
   return order;
 }
