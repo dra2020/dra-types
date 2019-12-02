@@ -1,3 +1,9 @@
+export declare type BlockMap = {
+    [id: string]: number;
+};
+export declare type BlockMapping = {
+    [id: string]: string;
+};
 export interface Comment {
     userid: string;
     text: string;
@@ -48,3 +54,17 @@ export declare type DistrictOrder = {
     [districtID: string]: number;
 };
 export declare function canonicalDistrictIDOrdering(order: DistrictOrder): DistrictOrder;
+export interface ConvertResult {
+    inBlockMap: BlockMapping;
+    inStateMap: BlockMapping;
+    outValid: boolean;
+    outState: string;
+    outMap: BlockMapping;
+    outOrder: DistrictOrder;
+    outDistrictToSplit: DistrictToSplitBlock;
+}
+export declare function blockmapToState(blockMap: BlockMapping): string;
+export declare function blockmapToVTDmap(blockMap: BlockMapping, stateMap: BlockMapping): ConvertResult;
+export declare const GEOIDToState: any;
+export declare const StateToGEOID: any;
+export declare function geoidToState(geoid: string): string;

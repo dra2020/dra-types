@@ -126,6 +126,7 @@ __export(__webpack_require__(/*! ./dra-types */ "./lib/dra-types.ts"));
 Object.defineProperty(exports, "__esModule", { value: true });
 // Public libraries
 const Hash = __webpack_require__(/*! object-hash */ "object-hash");
+const Util = __webpack_require__(/*! @dra2020/util */ "@dra2020/util");
 // Canonical hashing of splitblock data
 function hash(o) {
     return Hash(o, { respectType: false,
@@ -276,7 +277,231 @@ function canonicalDistrictIDOrdering(order) {
     return order;
 }
 exports.canonicalDistrictIDOrdering = canonicalDistrictIDOrdering;
+function blockmapToState(blockMap) {
+    for (var id in blockMap)
+        if (blockMap.hasOwnProperty(id))
+            return geoidToState(id);
+    return null;
+}
+exports.blockmapToState = blockmapToState;
+// blockToVTD:
+//  Take BlockMapping (simple map of GEOID to districtID) and a per-state map of block-level GEOID to VTD
+//  and return the output mapping of VTD to districtID, as well a data structure that describes any VTD's
+//  that need to be split between districtIDs. Also returns the DistrictOrder structure that defines the
+//  districtIDs that were used by the file.
+//
+//  The state (as specified by the first two digits of the GEOID) is also determined. If the GEOID's do
+//  not all specify the same state, the mapping is considered invalid and the outValid flag is set to false.
+//
+function blockmapToVTDmap(blockMap, stateMap) {
+    let res = {
+        inBlockMap: blockMap,
+        inStateMap: stateMap,
+        outValid: true,
+        outState: null,
+        outMap: {},
+        outOrder: {},
+        outDistrictToSplit: {}
+    };
+    let bmGather = {};
+    let revMap = {};
+    let id;
+    if (stateMap)
+        for (id in stateMap)
+            if (stateMap.hasOwnProperty(id))
+                revMap[stateMap[id]] = null;
+    // First aggregate into features across all the blocks
+    for (id in blockMap)
+        if (blockMap.hasOwnProperty(id)) {
+            let state = geoidToState(id);
+            if (res.outState == null)
+                res.outState = state;
+            else if (res.outState !== state) {
+                res.outValid = false;
+                break;
+            }
+            let districtID = canonicalDistrictID(blockMap[id]);
+            // Just ignore ZZZ (water) blocks
+            if (districtID === 'ZZZ')
+                continue;
+            let n = id.length;
+            let geoid;
+            // Simple test for block id (vs. voting district or block group) id
+            if (n >= 15) {
+                if (stateMap && stateMap[id] !== undefined)
+                    geoid = stateMap[id];
+                else {
+                    geoid = id.substr(0, 12); // heuristic for mapping blockID to blockgroupID
+                    if (revMap[geoid] === undefined) {
+                        res.outValid = false;
+                        break;
+                    }
+                }
+            }
+            else
+                geoid = id;
+            if (res.outOrder[districtID] === undefined)
+                res.outOrder[districtID] = 0;
+            let districtToBlocks = bmGather[geoid];
+            if (districtToBlocks === undefined)
+                bmGather[geoid] = { [districtID]: { [id]: true } };
+            else {
+                let thisDistrict = districtToBlocks[districtID];
+                if (thisDistrict === undefined) {
+                    thisDistrict = {};
+                    districtToBlocks[districtID] = thisDistrict;
+                }
+                thisDistrict[id] = true;
+            }
+        }
+    // Now determine actual mapping of blocks to features, looking for split features
+    for (let geoid in bmGather)
+        if (bmGather.hasOwnProperty(geoid)) {
+            let districtToBlocks = bmGather[geoid];
+            if (Util.countKeys(districtToBlocks) == 1) {
+                res.outMap[geoid] = Util.nthKey(districtToBlocks);
+            }
+            else {
+                for (let districtID in districtToBlocks)
+                    if (districtToBlocks.hasOwnProperty(districtID)) {
+                        let split = { state: '', datasource: '', geoid: geoid, blocks: Object.keys(districtToBlocks[districtID]) };
+                        let splits = res.outDistrictToSplit[districtID];
+                        if (splits === undefined) {
+                            splits = [];
+                            res.outDistrictToSplit[districtID] = splits;
+                        }
+                        splits.push(split);
+                    }
+            }
+        }
+    res.outOrder = canonicalDistrictIDOrdering(res.outOrder);
+    return res;
+}
+exports.blockmapToVTDmap = blockmapToVTDmap;
+exports.GEOIDToState = {
+    '01': 'AL',
+    '02': 'AK',
+    '04': 'AZ',
+    '05': 'AR',
+    '06': 'CA',
+    '08': 'CO',
+    '09': 'CT',
+    '10': 'DE',
+    '12': 'FL',
+    '13': 'GA',
+    '15': 'HI',
+    '16': 'ID',
+    '17': 'IL',
+    '18': 'IN',
+    '19': 'IA',
+    '20': 'KS',
+    '21': 'KY',
+    '22': 'LA',
+    '23': 'ME',
+    '24': 'MD',
+    '25': 'MA',
+    '26': 'MI',
+    '27': 'MN',
+    '28': 'MS',
+    '29': 'MO',
+    '30': 'MT',
+    '31': 'NE',
+    '32': 'NV',
+    '33': 'NH',
+    '34': 'NJ',
+    '35': 'NM',
+    '36': 'NY',
+    '37': 'NC',
+    '38': 'ND',
+    '39': 'OH',
+    '40': 'OK',
+    '41': 'OR',
+    '42': 'PA',
+    '44': 'RI',
+    '45': 'SC',
+    '46': 'SD',
+    '47': 'TN',
+    '48': 'TX',
+    '49': 'UT',
+    '50': 'VT',
+    '51': 'VA',
+    '53': 'WA',
+    '54': 'WV',
+    '55': 'WI',
+    '56': 'WY',
+};
+exports.StateToGEOID = {
+    'AL': '01',
+    'AK': '02',
+    'AZ': '04',
+    'AR': '05',
+    'CA': '06',
+    'CO': '08',
+    'CT': '09',
+    'DE': '10',
+    'FL': '12',
+    'GA': '13',
+    'HI': '15',
+    'ID': '16',
+    'IL': '17',
+    'IN': '18',
+    'IA': '19',
+    'KS': '20',
+    'KY': '21',
+    'LA': '22',
+    'ME': '23',
+    'MD': '24',
+    'MA': '25',
+    'MI': '26',
+    'MN': '27',
+    'MS': '28',
+    'MO': '29',
+    'MT': '30',
+    'NE': '31',
+    'NV': '32',
+    'NH': '33',
+    'NJ': '34',
+    'NM': '35',
+    'NY': '36',
+    'NC': '37',
+    'ND': '38',
+    'OH': '39',
+    'OK': '40',
+    'OR': '41',
+    'PA': '42',
+    'RI': '44',
+    'SC': '45',
+    'SD': '46',
+    'TN': '47',
+    'TX': '48',
+    'UT': '49',
+    'VT': '50',
+    'VA': '51',
+    'WA': '53',
+    'WV': '54',
+    'WI': '55',
+    'WY': '56',
+};
+function geoidToState(geoid) {
+    let re = /^(..).*$/;
+    let a = re.exec(geoid);
+    if (a == null || a.length != 2)
+        return null;
+    return exports.GEOIDToState[a[1]];
+}
+exports.geoidToState = geoidToState;
 
+
+/***/ }),
+
+/***/ "@dra2020/util":
+/*!********************************!*\
+  !*** external "@dra2020/util" ***!
+  \********************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("@dra2020/util");
 
 /***/ }),
 

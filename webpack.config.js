@@ -10,6 +10,12 @@ fs.readdirSync('node_modules')
     nodeModules[mod] = 'commonjs ' + mod;
 });
 
+fs.readdirSync('node_modules/@dra2020')
+  .forEach((mod) => {
+    mod = '@dra2020/' + mod;
+    nodeModules[mod] = 'commonjs ' + mod;
+  });
+
 var libConfig = {
     entry: {
       library: './lib/all.ts'
