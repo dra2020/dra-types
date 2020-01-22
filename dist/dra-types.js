@@ -274,6 +274,8 @@ function canonicalDistrictIDOrdering(order) {
     // Remove water districts
     if (order['ZZZ'])
         delete order['ZZZ'];
+    if (order['ZZ'])
+        delete order['ZZ'];
     return order;
 }
 exports.canonicalDistrictIDOrdering = canonicalDistrictIDOrdering;

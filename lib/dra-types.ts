@@ -232,8 +232,8 @@ export function canonicalDistrictIDOrdering(order: DistrictOrder): DistrictOrder
     order[canonicalDistrictID(keys[i])] = i+1;
 
   // Remove water districts
-  if (order['ZZZ'])
-    delete order['ZZZ'];
+  if (order['ZZZ']) delete order['ZZZ'];
+  if (order['ZZ']) delete order['ZZ'];
 
   return order;
 }
