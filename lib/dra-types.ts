@@ -238,6 +238,32 @@ export function canonicalDistrictIDOrdering(order: DistrictOrder): DistrictOrder
   return order;
 }
 
+
+export interface OneCSVLine
+{
+  geoid: string;
+  districtID: string;
+}
+
+let reArray = [
+  /^(\d\d[^\s,"']*)[\s]*,[\s]*([^\s'"]+)[\s]*$/,
+  /^["'](\d\d[^"']*)["'][\s]*,[\s]*["']([^"']*)["'][\s]*$/,
+  /^(\d\d[^\s,]*)[\s]*,[\s]*["']([^"']*)["'][\s]*$/,
+  /^["'](\d\d[^"']*)["'][\s]*,[\s]*([^\s]+)[\s]*$/,
+  ];
+
+export function parseCSVLine(line: string): OneCSVLine
+{
+  if (line == null || line == '') return null;
+  for (let i: number = 0; i < reArray.length; i++)
+  {
+    let a = reArray[i].exec(line);
+    if (a && a.length === 3)
+      return { geoid: a[1], districtID: a[2] };
+  }
+  return null;
+}
+
 export interface ConvertResult
 {
   inBlockMap: BlockMapping;

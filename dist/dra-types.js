@@ -279,6 +279,23 @@ function canonicalDistrictIDOrdering(order) {
     return order;
 }
 exports.canonicalDistrictIDOrdering = canonicalDistrictIDOrdering;
+let reArray = [
+    /^(\d\d[^\s,"']*)[\s]*,[\s]*([^\s'"]+)[\s]*$/,
+    /^["'](\d\d[^"']*)["'][\s]*,[\s]*["']([^"']*)["'][\s]*$/,
+    /^(\d\d[^\s,]*)[\s]*,[\s]*["']([^"']*)["'][\s]*$/,
+    /^["'](\d\d[^"']*)["'][\s]*,[\s]*([^\s]+)[\s]*$/,
+];
+function parseCSVLine(line) {
+    if (line == null || line == '')
+        return null;
+    for (let i = 0; i < reArray.length; i++) {
+        let a = reArray[i].exec(line);
+        if (a && a.length === 3)
+            return { geoid: a[1], districtID: a[2] };
+    }
+    return null;
+}
+exports.parseCSVLine = parseCSVLine;
 function blockmapToState(blockMap) {
     for (var id in blockMap)
         if (blockMap.hasOwnProperty(id))

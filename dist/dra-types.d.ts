@@ -54,6 +54,11 @@ export declare type DistrictOrder = {
     [districtID: string]: number;
 };
 export declare function canonicalDistrictIDOrdering(order: DistrictOrder): DistrictOrder;
+export interface OneCSVLine {
+    geoid: string;
+    districtID: string;
+}
+export declare function parseCSVLine(line: string): OneCSVLine;
 export interface ConvertResult {
     inBlockMap: BlockMapping;
     inStateMap: BlockMapping;
