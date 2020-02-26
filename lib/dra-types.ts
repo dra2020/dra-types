@@ -626,5 +626,5 @@ const ValidStateUrls: ValidStateUrlsType = {
 
 export function isStateUrl(s: any): s is StateUrls
 {
-  return (typeof s === 'string' && s in Object.keys(ValidStateUrls));
+  return (typeof s === 'string' && s in ValidStateUrls);
 }

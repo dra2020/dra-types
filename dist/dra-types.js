@@ -562,7 +562,7 @@ const ValidStateUrls = {
     'wyoming': true,
 };
 function isStateUrl(s) {
-    return (typeof s === 'string' && s in Object.keys(ValidStateUrls));
+    return (typeof s === 'string' && s in ValidStateUrls);
 }
 exports.isStateUrl = isStateUrl;
 
