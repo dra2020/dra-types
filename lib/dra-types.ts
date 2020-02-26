@@ -512,3 +512,119 @@ export function geoidToState(geoid: string): string
   if (a == null || a.length != 2) return null;
   return GEOIDToState[a[1]];
 }
+
+export type StateUrls = (
+  'alabama' |
+  'alaska' |
+  'arizona' |
+  'arkansas' |
+  'california' |
+  'colorado' |
+  'connecticut' |
+  'delaware' |
+  'florida' |
+  'georgia' |
+  'hawaii' |
+  'idaho' |
+  'illinois' |
+  'indiana' |
+  'iowa' |
+  'kansas' |
+  'kentucky' |
+  'louisiana' |
+  'maine' |
+  'maryland' |
+  'massachusetts' |
+  'michigan' |
+  'minnesota' |
+  'mississippi' |
+  'missouri' |
+  'montana' |
+  'nebraska' |
+  'nevada' |
+  'new-hampshire' |
+  'new-jersey' |
+  'new-mexico' |
+  'new-york' |
+  'north-carolina' |
+  'north-dakota' |
+  'ohio' |
+  'oklahoma' |
+  'oregon' |
+  'pennsylvania' |
+  'rhode-island' |
+  'south-carolina' |
+  'south-dakota' |
+  'tennessee' |
+  'texas' |
+  'utah' |
+  'vermont' |
+  'virginia' |
+  'washington' |
+  'west-virginia' |
+  'wisconsin' |
+  'wyoming'
+);
+
+export type ValidStateUrlsType =
+{
+  readonly [stateUrl in StateUrls]: boolean;
+};
+
+const ValidStateUrls: ValidStateUrlsType = {
+  'alabama': true,
+  'alaska': true,
+  'arizona': true,
+  'arkansas': true,
+  'california': true,
+  'colorado': true,
+  'connecticut': true,
+  'delaware': true,
+  'florida': true,
+  'georgia': true,
+  'hawaii': true,
+  'idaho': true,
+  'illinois': true,
+  'indiana': true,
+  'iowa': true,
+  'kansas': true,
+  'kentucky': true,
+  'louisiana': true,
+  'maine': true,
+  'maryland': true,
+  'massachusetts': true,
+  'michigan': true,
+  'minnesota': true,
+  'mississippi': true,
+  'missouri': true,
+  'montana': true,
+  'nebraska': true,
+  'nevada': true,
+  'new-hampshire': true,
+  'new-jersey': true,
+  'new-mexico': true,
+  'new-york': true,
+  'north-carolina': true,
+  'north-dakota': true,
+  'ohio': true,
+  'oklahoma': true,
+  'oregon': true,
+  'pennsylvania': true,
+  'rhode-island': true,
+  'south-carolina': true,
+  'south-dakota': true,
+  'tennessee': true,
+  'texas': true,
+  'utah': true,
+  'vermont': true,
+  'virginia': true,
+  'washington': true,
+  'west-virginia': true,
+  'wisconsin': true,
+  'wyoming': true,
+};
+
+export function isStateUrl(s: any): s is StateUrls
+{
+  return (typeof s === 'string' && s in Object.keys(ValidStateUrls));
+}

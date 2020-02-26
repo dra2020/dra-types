@@ -509,6 +509,62 @@ function geoidToState(geoid) {
     return exports.GEOIDToState[a[1]];
 }
 exports.geoidToState = geoidToState;
+const ValidStateUrls = {
+    'alabama': true,
+    'alaska': true,
+    'arizona': true,
+    'arkansas': true,
+    'california': true,
+    'colorado': true,
+    'connecticut': true,
+    'delaware': true,
+    'florida': true,
+    'georgia': true,
+    'hawaii': true,
+    'idaho': true,
+    'illinois': true,
+    'indiana': true,
+    'iowa': true,
+    'kansas': true,
+    'kentucky': true,
+    'louisiana': true,
+    'maine': true,
+    'maryland': true,
+    'massachusetts': true,
+    'michigan': true,
+    'minnesota': true,
+    'mississippi': true,
+    'missouri': true,
+    'montana': true,
+    'nebraska': true,
+    'nevada': true,
+    'new-hampshire': true,
+    'new-jersey': true,
+    'new-mexico': true,
+    'new-york': true,
+    'north-carolina': true,
+    'north-dakota': true,
+    'ohio': true,
+    'oklahoma': true,
+    'oregon': true,
+    'pennsylvania': true,
+    'rhode-island': true,
+    'south-carolina': true,
+    'south-dakota': true,
+    'tennessee': true,
+    'texas': true,
+    'utah': true,
+    'vermont': true,
+    'virginia': true,
+    'washington': true,
+    'west-virginia': true,
+    'wisconsin': true,
+    'wyoming': true,
+};
+function isStateUrl(s) {
+    return (typeof s === 'string' && s in Object.keys(ValidStateUrls));
+}
+exports.isStateUrl = isStateUrl;
 
 
 /***/ }),
