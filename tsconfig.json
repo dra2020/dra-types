@@ -1,7 +1,8 @@
 {
 	"files": [
 		"lib/all.ts",
-		"lib/dra-types.ts"
+		"lib/dra-types.ts",
+		"lib/schemas.ts",
 	],
 
   "include": [
