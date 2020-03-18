@@ -631,7 +631,10 @@ exports.Schemas = {
             xprops: 'M',
         },
         KeySchema: { createdBy: 'HASH', id: 'RANGE' },
-        GlobalSecondaryIndexes: [{ published: 'HASH' }],
+        GlobalSecondaryIndexes: [
+            { published: 'HASH' },
+            { id: 'HASH' }
+        ],
     },
     'splitblock': {
         FileOptions: { map: true },

@@ -51,7 +51,10 @@ export let Schemas: any = {
         xprops: 'M',
       },
       KeySchema: { createdBy: 'HASH', id: 'RANGE' },
-      GlobalSecondaryIndexes: [ { published: 'HASH' } ],  // sparse
+      GlobalSecondaryIndexes: [
+          { published: 'HASH' },
+          { id: 'HASH' }
+        ],  // sparse
     },
   'splitblock':
     {
