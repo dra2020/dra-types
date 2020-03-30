@@ -3,6 +3,7 @@
 		"lib/all.ts",
 		"lib/dra-types.ts",
 		"lib/schemas.ts",
+		"lib/bucketmap.ts",
 	],
 
   "include": [

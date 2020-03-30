@@ -34,7 +34,7 @@ export let Schemas: any = {
         name: 'S',
         type: 'S',
         description: 'S',
-        labels: 'SS',
+        labels: 'L',
         createdBy: 'S',
         lastActive: 'S',
         createTime: 'S',
@@ -65,7 +65,7 @@ export let Schemas: any = {
         state: 'S',
         datasource: 'S',
         geoid: 'S',
-        blocks: 'SS'
+        blocks: 'L'
       },
       KeySchema: { id: 'HASH' }
     },

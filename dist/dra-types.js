@@ -111,6 +111,35 @@ function __export(m) {
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(__webpack_require__(/*! ./dra-types */ "./lib/dra-types.ts"));
 __export(__webpack_require__(/*! ./schemas */ "./lib/schemas.ts"));
+__export(__webpack_require__(/*! ./bucketmap */ "./lib/bucketmap.ts"));
+
+
+/***/ }),
+
+/***/ "./lib/bucketmap.ts":
+/*!**************************!*\
+  !*** ./lib/bucketmap.ts ***!
+  \**************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.BucketMap = {
+    'default': 'dev-dra-us-west-2-723398989493',
+    'development': 'dev-dra-us-west-2-723398989493',
+    'production': 'dra-us-west-2-723398989493',
+    'logs': 'dra-uswest-logs',
+    'memsqs': 'dra-uswest-memsqs',
+    'images': 'dra-uswest-images',
+    'data': 'dra-us-west-datafiles',
+    'data-dev': 'dra-us-west-datafiles-dev',
+    'splits': 'dra-block-cache',
+    'splits-dev': 'dra-block-cache-dev',
+    'counties': 'dra-county-cache',
+    'counties-dev': 'dra-county-cache',
+};
 
 
 /***/ }),
@@ -614,7 +643,7 @@ exports.Schemas = {
             name: 'S',
             type: 'S',
             description: 'S',
-            labels: 'SS',
+            labels: 'L',
             createdBy: 'S',
             lastActive: 'S',
             createTime: 'S',
@@ -644,7 +673,7 @@ exports.Schemas = {
             state: 'S',
             datasource: 'S',
             geoid: 'S',
-            blocks: 'SS'
+            blocks: 'L'
         },
         KeySchema: { id: 'HASH' }
     },
