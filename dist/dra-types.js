@@ -670,12 +670,16 @@ exports.Schemas = {
         Schema: {
             id: 'S',
             chunk: 'S',
+            chunkKey: 'S',
             state: 'S',
             datasource: 'S',
             geoid: 'S',
             blocks: 'L'
         },
-        KeySchema: { id: 'HASH' }
+        KeySchema: { id: 'HASH' },
+        GlobalSecondaryIndexes: [
+            { chunkKey: 'HASH', id: 'RANGE' },
+        ],
     },
     'access': {
         FileOptions: { map: true, noobject: true },
@@ -705,6 +709,7 @@ exports.Schemas = {
     'userlikes': {},
     'likes': {},
     'comments': {},
+    'stats': {},
 };
 
 

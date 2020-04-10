@@ -62,12 +62,16 @@ export let Schemas: any = {
       Schema: {
         id: 'S',
         chunk: 'S',
+        chunkKey: 'S',
         state: 'S',
         datasource: 'S',
         geoid: 'S',
         blocks: 'L'
       },
-      KeySchema: { id: 'HASH' }
+      KeySchema: { id: 'HASH' },
+      GlobalSecondaryIndexes: [
+          { chunkKey: 'HASH', id: 'RANGE' },
+        ],
     },
   'access':
     {
@@ -103,5 +107,7 @@ export let Schemas: any = {
   'likes':
     {},
   'comments':
+    {},
+  'stats':
     {},
 }
