@@ -29,6 +29,7 @@ export interface UserLikes {
 }
 export interface SplitBlock {
     id?: string;
+    chunkKey?: string;
     chunk?: string;
     state: string;
     datasource: string;
