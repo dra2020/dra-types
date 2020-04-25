@@ -16,4 +16,6 @@ export const BucketMap: any =
     'counties-dev': 'dra-county-cache',
     'geojson': 'dra-uswest-geojson',
     'geojson-dev': 'dra-uswest-geojson',
+    'transfers': 'dra-transfers',
+    'transfers-dev': 'dra-transfers-dev',
   }
