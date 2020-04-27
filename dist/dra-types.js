@@ -112,6 +112,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __export(__webpack_require__(/*! ./dra-types */ "./lib/dra-types.ts"));
 __export(__webpack_require__(/*! ./schemas */ "./lib/schemas.ts"));
 __export(__webpack_require__(/*! ./bucketmap */ "./lib/bucketmap.ts"));
+__export(__webpack_require__(/*! ./colordata */ "./lib/colordata.ts"));
+__export(__webpack_require__(/*! ./gencolor */ "./lib/gencolor.ts"));
 
 
 /***/ }),
@@ -146,6 +148,327 @@ exports.BucketMap = {
     'transfers': 'dra-transfers',
     'transfers-dev': 'dra-transfers-dev',
 };
+
+
+/***/ }),
+
+/***/ "./lib/colordata.ts":
+/*!**************************!*\
+  !*** ./lib/colordata.ts ***!
+  \**************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DefaultColorNames = [
+    'GhostWhite',
+    'Blue',
+    'Green',
+    'DarkMagenta',
+    'Red',
+    'Gold',
+    'Teal',
+    'Chocolate',
+    'SlateBlue',
+    'Cyan',
+    'DeepPink',
+    'Chartreuse',
+    'CornflowerBlue',
+    'DarkSalmon',
+    'Olive',
+    'DarkOrange',
+    'Lime',
+    'DarkSlateBlue',
+    'Yellow',
+    'YellowGreen',
+    'Pink',
+    'Maroon',
+    'Sienna',
+    'Aquamarine',
+    'Indigo',
+    'PaleVioletRed',
+    'Navy',
+    'SpringGreen',
+    'Plum',
+    'DarkSeaGreen',
+    'LightCoral',
+    'Khaki',
+    'OrangeRed',
+    'RoyalBlue',
+    'LimeGreen',
+    'DarkOrchid',
+    'Orange',
+    'DodgerBlue',
+    'MediumAquamarine',
+    'Moccasin',
+    'Firebrick',
+    'LightSteelBlue',
+    'LawnGreen',
+    'Magenta',
+    'MediumVioletRed',
+    'Turquoise',
+    'Tomato',
+    'Thistle',
+    'SandyBrown',
+    'IndianRed',
+    'PowderBlue',
+    'SaddleBrown',
+    'OliveDrab',
+    'Fuchsia',
+    'PeachPuff',
+    'RosyBrown',
+];
+exports.ColorValues = {
+    'AliceBlue': '#F0F8FF',
+    'AntiqueWhite': '#FAEBD7',
+    'Aqua': '#00FFFF',
+    'Aquamarine': '#7FFFD4',
+    'Azure': '#F0FFFF',
+    'Beige': '#F5F5DC',
+    'Bisque': '#FFE4C4',
+    'Black': '#000000',
+    'BlanchedAlmond': '#FFEBCD',
+    'Blue': '#0000FF',
+    'BlueViolet': '#8A2BE2',
+    'Brown': '#A52A2A',
+    'BurlyWood': '#DEB887',
+    'CadetBlue': '#5F9EA0',
+    'Chartreuse': '#7FFF00',
+    'Chocolate': '#D2691E',
+    'Coral': '#FF7F50',
+    'CornflowerBlue': '#6495ED',
+    'Cornsilk': '#FFF8DC',
+    'Crimson': '#DC143C',
+    'Cyan': '#00FFFF',
+    'DarkBlue': '#00008B',
+    'DarkCyan': '#008B8B',
+    'DarkGoldenrod': '#B8860B',
+    'DarkGray': '#A9A9A9',
+    'DarkGreen': '#006400',
+    'DarkKhaki': '#BDB76B',
+    'DarkMagenta': '#8B008B',
+    'DarkOliveGreen': '#556B2F',
+    'DarkOrange': '#FF8C00',
+    'DarkOrchid': '#9932CC',
+    'DarkRed': '#8B0000',
+    'DarkSalmon': '#E9967A',
+    'DarkSeaGreen': '#8FBC8F',
+    'DarkSlateBlue': '#483D8B',
+    'DarkSlateGray': '#2F4F4F',
+    'DarkTurquoise': '#00CED1',
+    'DarkViolet': '#9400D3',
+    'DeepPink': '#FF1493',
+    'DeepSkyBlue': '#00BFFF',
+    'DimGray': '#696969',
+    'DodgerBlue': '#1E90FF',
+    'Firebrick': '#B22222',
+    'FloralWhite': '#FFFAF0',
+    'ForestGreen': '#228B22',
+    'Fuchsia': '#FF00FF',
+    'Gainsboro': '#DCDCDC',
+    'GhostWhite': '#F8F8FF',
+    'Gold': '#FFD700',
+    'Goldenrod': '#DAA520',
+    'Gray': '#808080',
+    'Green': '#008000',
+    'GreenYellow': '#ADFF2F',
+    'Honeydew': '#F0FFF0',
+    'HotPink': '#FF69B4',
+    'IndianRed': '#CD5C5C',
+    'Indigo': '#4B0082',
+    'Ivory': '#FFFFF0',
+    'Khaki': '#F0E68C',
+    'Lavender': '#E6E6FA',
+    'LavenderBlush': '#FFF0F5',
+    'LawnGreen': '#7CFC00',
+    'LemonChiffon': '#FFFACD',
+    'LightBlue': '#ADD8E6',
+    'LightCoral': '#F08080',
+    'LightCyan': '#E0FFFF',
+    'LightGoldenrodYellow': '#FAFAD2',
+    'LightGray': '#D3D3D3',
+    'LightGreen': '#90EE90',
+    'LightPink': '#FFB6C1',
+    'LightSalmon': '#FFA07A',
+    'LightSeaGreen': '#20B2AA',
+    'LightSkyBlue': '#87CEFA',
+    'LightSlateGray': '#778899',
+    'LightSteelBlue': '#B0C4DE',
+    'LightYellow': '#FFFFE0',
+    'Lime': '#00FF00',
+    'LimeGreen': '#32CD32',
+    'Linen': '#FAF0E6',
+    'Magenta': '#FF00FF',
+    'Maroon': '#800000',
+    'MediumAquamarine': '#66CDAA',
+    'MediumBlue': '#0000CD',
+    'MediumOrchid': '#BA55D3',
+    'MediumPurple': '#9370DB',
+    'MediumSeaGreen': '#3CB371',
+    'MediumSlateBlue': '#7B68EE',
+    'MediumSpringGreen': '#00FA9A',
+    'MediumTurquoise': '#48D1CC',
+    'MediumVioletRed': '#C71585',
+    'MidnightBlue': '#191970',
+    'MintCream': '#F5FFFA',
+    'MistyRose': '#FFE4E1',
+    'Moccasin': '#FFE4B5',
+    'NavajoWhite': '#FFDEAD',
+    'Navy': '#000080',
+    'OldLace': '#FDF5E6',
+    'Olive': '#808000',
+    'OliveDrab': '#6B8E23',
+    'Orange': '#FFA500',
+    'OrangeRed': '#FF4500',
+    'Orchid': '#DA70D6',
+    'PaleGoldenrod': '#EEE8AA',
+    'PaleGreen': '#98FB98',
+    'PaleTurquoise': '#AFEEEE',
+    'PaleVioletRed': '#DB7093',
+    'PapayaWhip': '#FFEFD5',
+    'PeachPuff': '#FFDAB9',
+    'Peru': '#CD853F',
+    'Pink': '#FFC0CB',
+    'Plum': '#DDA0DD',
+    'PowderBlue': '#B0E0E6',
+    'Purple': '#800080',
+    'Red': '#FF0000',
+    'RosyBrown': '#BC8F8F',
+    'RoyalBlue': '#4169E1',
+    'SaddleBrown': '#8B4513',
+    'Salmon': '#FA8072',
+    'SandyBrown': '#F4A460',
+    'SeaGreen': '#2E8B57',
+    'SeaShell': '#FFF5EE',
+    'Sienna': '#A0522D',
+    'Silver': '#C0C0C0',
+    'SkyBlue': '#87CEEB',
+    'SlateBlue': '#6A5ACD',
+    'SlateGray': '#708090',
+    'Snow': '#FFFAFA',
+    'SpringGreen': '#00FF7F',
+    'SteelBlue': '#4682B4',
+    'Tan': '#D2B48C',
+    'Teal': '#008080',
+    'Thistle': '#D8BFD8',
+    'Tomato': '#FF6347',
+    'Turquoise': '#40E0D0',
+    'Violet': '#EE82EE',
+    'Wheat': '#F5DEB3',
+    'White': '#FFFFFF',
+    'WhiteSmoke': '#F5F5F5',
+    'Yellow': '#FFFF00',
+    'YellowGreen': '#9ACD32',
+};
+exports.ColorBySolidWhite = 0;
+exports.ColorBySolidBlack = 1;
+exports.ColorBySolidHispanic = 2;
+exports.ColorBySolidAsian = 3;
+exports.ColorByMostlyWhite = 4;
+exports.ColorByMostlyBlack = 5;
+exports.ColorByMostlyHispanic = 6;
+exports.ColorByMostlyAsian = 7;
+exports.ColorByMostlyNative = 8;
+exports.ColorByMix = 9;
+exports.ColorByHispanicWhite = 10;
+exports.ColorByBlackWhite = 11;
+exports.ColorByHispanicBlack = 12;
+exports.ColorByAsianWhite = 13;
+exports.ColorByAsianHispanic = 14;
+exports.ColorByBlackAsian = 15;
+exports.EthnicBackgroundColor = [
+    '#c0392b',
+    '#3498db',
+    '#2ecc71',
+    '#9b59b6',
+    '#d98880',
+    '#aed6f1',
+    '#abebc6',
+    '#bb8fce',
+    '#f1c40f',
+    '#aab7b8',
+    '#d5f5e3',
+    '#d6eaf8',
+    '#186a3b',
+    '#e8daef',
+    '#45b39d',
+    '#4a235a',
+];
+exports.EthnicTextColor = [
+    '#ffffff',
+    '#ffffff',
+    '#ffffff',
+    '#ffffff',
+    '#000000',
+    '#000000',
+    '#000000',
+    '#000000',
+    '#000000',
+    '#000000',
+    '#000000',
+    '#000000',
+    '#ffffff',
+    '#000000',
+    '#000000',
+    '#ffffff',
+];
+exports.EthnicLabel = [
+    'Solid White',
+    'Solid Black',
+    'Solid Hispanic',
+    'Solid Asian',
+    'Mostly White',
+    'Mostly Black',
+    'Mostly Hispanic',
+    'Mostly Asian',
+    'Mostly Native',
+    'Mixed',
+    'Hispanic / White Mix',
+    'Black / White Mix',
+    'Hispanic / Black Mix',
+    'Asian / White Mix',
+    'Asian / Hispanic Mix',
+    'Black / Asian Mix'
+];
+exports.ColorByGreatR = 0;
+exports.ColorByGoodR = 1;
+exports.ColorByFairR = 2;
+exports.ColorByEven = 3;
+exports.ColorByFairD = 4;
+exports.ColorByGoodD = 5;
+exports.ColorByGreatD = 6;
+exports.ElectionBackgroundColor = [
+    '#CF0000',
+    '#FF4555',
+    '#FFB0CB',
+    '#9932CC',
+    '#87CEEB',
+    '#1E90FF',
+    '#0000CF',
+];
+exports.ElectionTextColor = [
+    '#ffffff',
+    '#000000',
+    '#000000',
+    '#ffffff',
+    '#000000',
+    '#000000',
+    '#ffffff',
+];
+exports.ElectionLabel = [
+    'Great Republican',
+    'Good Republican',
+    'Fair Republican',
+    'Even',
+    'Fair Democrat',
+    'Good Democrat',
+    'Great Democrat'
+];
+const lum = [0, 25, 50, 75, 100, 125, 150, 175, 200, 225, 255];
+exports.IntensityBackgroundColor = [];
+lum.forEach((n) => { exports.IntensityBackgroundColor.push(`rgba(${n}, ${n}, ${n}, 1.0)`); });
 
 
 /***/ }),
@@ -601,6 +924,37 @@ function isStateUrl(s) {
     return (typeof s === 'string' && s in ValidStateUrls);
 }
 exports.isStateUrl = isStateUrl;
+
+
+/***/ }),
+
+/***/ "./lib/gencolor.ts":
+/*!*************************!*\
+  !*** ./lib/gencolor.ts ***!
+  \*************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const ColorData = __webpack_require__(/*! ./colordata */ "./lib/colordata.ts");
+let ColorTable = null;
+const MaxColors = 100;
+function genColor(i, useFirstColor) {
+    function gen_table() {
+        ColorTable = [];
+        for (let i = 0; i < MaxColors; i++) {
+            // A little funky math below to skip the first (white) color
+            let j = (i % (ColorData.DefaultColorNames.length - 1)) + (useFirstColor ? 0 : 1);
+            ColorTable.push(ColorData.ColorValues[ColorData.DefaultColorNames[j]]);
+        }
+    }
+    if (ColorTable == null)
+        gen_table();
+    return ColorTable[i % MaxColors];
+}
+exports.genColor = genColor;
 
 
 /***/ }),
