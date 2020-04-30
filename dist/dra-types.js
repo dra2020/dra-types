@@ -135,8 +135,11 @@ exports.BucketMap = {
     'state': 'dra-us-west-2-723398989493',
     'state-dev': 'dev-dra-us-west-2-723398989493',
     'logs': 'dra-uswest-logs',
+    'logs-dev': 'dra-uswest-logs',
     'memsqs': 'dra-uswest-memsqs',
+    'memsqs-dev': 'dra-uswest-memsqs',
     'images': 'dra-uswest-images',
+    'images-dev': 'dra-uswest-images',
     'data': 'dra-us-west-datafiles',
     'data-dev': 'dra-us-west-datafiles-dev',
     'splits': 'dra-block-cache',
@@ -147,6 +150,8 @@ exports.BucketMap = {
     'geojson-dev': 'dra-uswest-geojson',
     'transfers': 'dra-transfers',
     'transfers-dev': 'dra-transfers-dev',
+    'downloads': 'dra-uswest-downloads',
+    'downloads-dev': 'dra-uswest-downloads',
 };
 
 
