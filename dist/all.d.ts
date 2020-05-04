@@ -3,3 +3,5 @@ export * from './schemas';
 export * from './bucketmap';
 export * from './colordata';
 export * from './gencolor';
+export * from './vfeature';
+export * from './csv';

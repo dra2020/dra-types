@@ -109,11 +109,12 @@ function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
 Object.defineProperty(exports, "__esModule", { value: true });
-__export(__webpack_require__(/*! ./dra-types */ "./lib/dra-types.ts"));
 __export(__webpack_require__(/*! ./schemas */ "./lib/schemas.ts"));
 __export(__webpack_require__(/*! ./bucketmap */ "./lib/bucketmap.ts"));
 __export(__webpack_require__(/*! ./colordata */ "./lib/colordata.ts"));
 __export(__webpack_require__(/*! ./gencolor */ "./lib/gencolor.ts"));
+__export(__webpack_require__(/*! ./vfeature */ "./lib/vfeature.ts"));
+__export(__webpack_require__(/*! ./csv */ "./lib/csv.ts"));
 
 
 /***/ }),
@@ -478,10 +479,10 @@ lum.forEach((n) => { exports.IntensityBackgroundColor.push(`rgba(${n}, ${n}, ${n
 
 /***/ }),
 
-/***/ "./lib/dra-types.ts":
-/*!**************************!*\
-  !*** ./lib/dra-types.ts ***!
-  \**************************/
+/***/ "./lib/csv.ts":
+/*!********************!*\
+  !*** ./lib/csv.ts ***!
+  \********************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -489,82 +490,7 @@ lum.forEach((n) => { exports.IntensityBackgroundColor.push(`rgba(${n}, ${n}, ${n
 
 Object.defineProperty(exports, "__esModule", { value: true });
 // Public libraries
-const Hash = __webpack_require__(/*! object-hash */ "object-hash");
 const Util = __webpack_require__(/*! @dra2020/util */ "@dra2020/util");
-// Canonical hashing of splitblock data
-function hash(o) {
-    return Hash(o, { respectType: false,
-        unorderedArrays: true,
-        unorderedObjects: true,
-        excludeKeys: (k) => (k === 'id' || k === 'chunk')
-    });
-}
-function vgeoidToGeoid(vgeoid) {
-    let re = /vfeature_([^_]*)_.*/;
-    let a = re.exec(vgeoid);
-    if (a == null || a.length != 2)
-        return '';
-    else
-        return a[1];
-}
-exports.vgeoidToGeoid = vgeoidToGeoid;
-function vgeoidToChunk(vgeoid) {
-    // vgeoid is string of form: "vfeature_[geoid]_[chunkid]_[hash]"
-    // the contents are chunked into a file of form "vfeature_chunk_[chunkid]"
-    // So extract the chunk ID and download that.
-    let re = /vfeature_([^_]*)_([^_*])_(.*)/;
-    let a = re.exec(vgeoid);
-    if (a && a.length == 4)
-        vgeoid = `vfeature_chunk_${a[2]}`;
-    else
-        vgeoid = null;
-    return vgeoid;
-}
-exports.vgeoidToChunk = vgeoidToChunk;
-function vgeoidToHash(vgeoid) {
-    // vgeoid is string of form: "vfeature_[geoid]_[chunkid]_[hash]"
-    let re = /vfeature_([^_]*)_([^_*])_(.*)/;
-    let a = re.exec(vgeoid);
-    if (a && a.length == 4)
-        vgeoid = a[3];
-    else
-        vgeoid = null;
-    return vgeoid;
-}
-exports.vgeoidToHash = vgeoidToHash;
-function isVfeature(geoid) {
-    return geoid.indexOf('vfeature') === 0;
-}
-exports.isVfeature = isVfeature;
-function splitToCacheKey(s) {
-    if (s.id === undefined)
-        s.id = hash(s);
-    if (s.chunk === undefined)
-        s.chunk = "0";
-    return `_${s.state}_${s.datasource}_vfeature_${s.geoid}_${s.chunk}_${s.id}.geojson`;
-}
-exports.splitToCacheKey = splitToCacheKey;
-function splitToChunkKey(s) {
-    if (s.chunk === undefined)
-        s.chunk = "0";
-    return `_${s.state}_${s.datasource}_vfeature_chunk_${s.chunk}.geojson`;
-}
-exports.splitToChunkKey = splitToChunkKey;
-function splitToPrefix(s) {
-    if (s.blocks === undefined) {
-        let re = /_([^_]*)_(.*)_vfeature.*\.geojson$/;
-        let a = re.exec(s.id);
-        if (a && a.length == 3)
-            return `_${a[1]}_${a[2]}`;
-        return s.id;
-    }
-    return `_${s.state}_${s.datasource}`;
-}
-exports.splitToPrefix = splitToPrefix;
-function cacheKeysToChunkHash(keys) {
-    return hash(keys);
-}
-exports.cacheKeysToChunkHash = cacheKeysToChunkHash;
 let reNumeric = /^(\D*)(\d*)(\D*)$/;
 let reDistrictNumber = /^\d+$/;
 let reDistrictNumeric = /^\d/;
@@ -580,6 +506,8 @@ function canonicalDistrictID(districtID) {
 }
 exports.canonicalDistrictID = canonicalDistrictID;
 // Normalize any numeric part to have four digits with padded leading zeros
+// so alphabetic sorting will result in correct numeric sort for mixed alphanumber
+// district labels.
 function canonicalSortingDistrictID(districtID) {
     let a = reNumeric.exec(districtID);
     if (a && a.length == 4) {
@@ -625,12 +553,34 @@ function canonicalDistrictIDFromNumber(districtID, n) {
     return districtID;
 }
 exports.canonicalDistrictIDFromNumber = canonicalDistrictIDFromNumber;
+// If purely numeric districtIDs and we are missing some number of IDs less than
+function canonicalDistrictIDGapFill(keys) {
+    if (keys == null || keys.length == 0)
+        return keys;
+    let nonNumeric = keys.find((s) => !reDistrictNumber.test(s)) !== undefined;
+    if (nonNumeric)
+        return keys;
+    let max = Number(keys[keys.length - 1]);
+    if (max == keys.length || (max - keys.length) > keys.length)
+        return keys; // no gaps or too many gaps
+    // OK, finally going to fill some gaps
+    for (let i = 0; i < keys.length; i++) {
+        let here = Number(keys[i]);
+        while (here > i + 1) {
+            keys.splice(i, 0, canonicalSortingDistrictID(String(i + 1)));
+            i++;
+        }
+    }
+    return keys;
+}
+exports.canonicalDistrictIDGapFill = canonicalDistrictIDGapFill;
 function canonicalDistrictIDOrdering(order) {
     let keys = Object.keys(order);
     let i;
     let a = [];
     let template = undefined;
     keys = keys.map((s) => canonicalSortingDistrictID(s));
+    keys = canonicalDistrictIDGapFill(keys);
     keys.sort();
     order = {};
     for (i = 0; i < keys.length; i++)
@@ -1076,6 +1026,96 @@ exports.Schemas = {
     'comments': {},
     'stats': {},
 };
+
+
+/***/ }),
+
+/***/ "./lib/vfeature.ts":
+/*!*************************!*\
+  !*** ./lib/vfeature.ts ***!
+  \*************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+// Public libraries
+const Hash = __webpack_require__(/*! object-hash */ "object-hash");
+// Canonical hashing of splitblock data
+function hash(o) {
+    return Hash(o, { respectType: false,
+        unorderedArrays: true,
+        unorderedObjects: true,
+        excludeKeys: (k) => (k === 'id' || k === 'chunk')
+    });
+}
+function vgeoidToGeoid(vgeoid) {
+    let re = /vfeature_([^_]*)_.*/;
+    let a = re.exec(vgeoid);
+    if (a == null || a.length != 2)
+        return '';
+    else
+        return a[1];
+}
+exports.vgeoidToGeoid = vgeoidToGeoid;
+function vgeoidToChunk(vgeoid) {
+    // vgeoid is string of form: "vfeature_[geoid]_[chunkid]_[hash]"
+    // the contents are chunked into a file of form "vfeature_chunk_[chunkid]"
+    // So extract the chunk ID and download that.
+    let re = /vfeature_([^_]*)_([^_*])_(.*)/;
+    let a = re.exec(vgeoid);
+    if (a && a.length == 4)
+        vgeoid = `vfeature_chunk_${a[2]}`;
+    else
+        vgeoid = null;
+    return vgeoid;
+}
+exports.vgeoidToChunk = vgeoidToChunk;
+function vgeoidToHash(vgeoid) {
+    // vgeoid is string of form: "vfeature_[geoid]_[chunkid]_[hash]"
+    let re = /vfeature_([^_]*)_([^_*])_(.*)/;
+    let a = re.exec(vgeoid);
+    if (a && a.length == 4)
+        vgeoid = a[3];
+    else
+        vgeoid = null;
+    return vgeoid;
+}
+exports.vgeoidToHash = vgeoidToHash;
+function isVfeature(geoid) {
+    return geoid.indexOf('vfeature') === 0;
+}
+exports.isVfeature = isVfeature;
+function splitToCacheKey(s) {
+    if (s.id === undefined)
+        s.id = hash(s);
+    if (s.chunk === undefined)
+        s.chunk = "0";
+    return `_${s.state}_${s.datasource}_vfeature_${s.geoid}_${s.chunk}_${s.id}.geojson`;
+}
+exports.splitToCacheKey = splitToCacheKey;
+function splitToChunkKey(s) {
+    if (s.chunk === undefined)
+        s.chunk = "0";
+    return `_${s.state}_${s.datasource}_vfeature_chunk_${s.chunk}.geojson`;
+}
+exports.splitToChunkKey = splitToChunkKey;
+function splitToPrefix(s) {
+    if (s.blocks === undefined) {
+        let re = /_([^_]*)_(.*)_vfeature.*\.geojson$/;
+        let a = re.exec(s.id);
+        if (a && a.length == 3)
+            return `_${a[1]}_${a[2]}`;
+        return s.id;
+    }
+    return `_${s.state}_${s.datasource}`;
+}
+exports.splitToPrefix = splitToPrefix;
+function cacheKeysToChunkHash(keys) {
+    return hash(keys);
+}
+exports.cacheKeysToChunkHash = cacheKeysToChunkHash;
 
 
 /***/ }),
