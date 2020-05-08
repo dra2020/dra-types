@@ -5,3 +5,4 @@ export * from './colordata';
 export * from './gencolor';
 export * from './vfeature';
 export * from './csv';
+export * from './stats';
