@@ -14,6 +14,7 @@ export let Schemas: any = {
         resetGUID: 'S',
         resetTime: 'S',
         lastActive: 'S',
+        modifyTime: 'S',
         resetCount: 'N',
         accessed: 'M',
         likeID: 'S',
