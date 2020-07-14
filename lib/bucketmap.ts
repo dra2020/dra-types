@@ -16,7 +16,7 @@ export const BucketMap: any =
     'splits': 'dra-block-cache',
     'splits-dev': 'dra-block-cache-dev',
     'counties': 'dra-county-cache',
-    'counties-dev': 'dra-county-cache',
+    'counties-dev': 'dra-county-cache-dev',
     'geojson': 'dra-uswest-geojson',
     'geojson-dev': 'dra-uswest-geojson',
     'transfers': 'dra-transfers',
