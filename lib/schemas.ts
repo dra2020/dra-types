@@ -113,4 +113,24 @@ export let Schemas: any = {
     {},
   'livestats':
     {},
+  'layer':
+    {
+      FileOptions: { map: true },
+      Schema: {
+        id: 'S',
+        name: 'S',
+        description: 'S',
+        createdBy: 'S',
+        createTime: 'S',
+        modifyTime: 'S',
+        deleted: 'BOOL',
+        published: 'S',
+        official: 'BOOL',
+      },
+      KeySchema: { createdBy: 'HASH', id: 'RANGE' },
+      GlobalSecondaryIndexes: [
+          { published: 'HASH' },
+          { id: 'HASH' }
+        ],  // sparse
+    },
 }

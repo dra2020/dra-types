@@ -11,6 +11,8 @@ export const BucketMap: any =
     'memsqs-dev': 'dra-uswest-memsqs',
     'images': 'dra-uswest-images',
     'images-dev': 'dra-uswest-images',
+    'layers': 'dra-uswest-layers',
+    'layers-dev': 'dra-uswest-layers',
     'data': 'dra-us-west-datafiles',
     'data-dev': 'dra-us-west-datafiles-dev',
     'splits': 'dra-block-cache',
