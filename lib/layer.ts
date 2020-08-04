@@ -4,6 +4,7 @@ export interface GeoLayer
   id: string,
   name?: string,
   description?: string,
+  state?: string,
   createTime?: string,
   modifyTime?: string,
   deleted?: boolean,
