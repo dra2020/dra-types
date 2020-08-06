@@ -1,4 +1,4 @@
-export interface GeoLayer
+export interface UserLayer
 {
   createdBy: string,
   id: string,
