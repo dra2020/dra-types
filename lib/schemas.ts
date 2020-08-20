@@ -126,6 +126,7 @@ export let Schemas: any = {
         deleted: 'BOOL',
         published: 'S',
         official: 'BOOL',
+        state: 'S',
       },
       KeySchema: { createdBy: 'HASH', id: 'RANGE' },
       GlobalSecondaryIndexes: [
