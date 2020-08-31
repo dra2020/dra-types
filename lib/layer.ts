@@ -12,7 +12,12 @@ export interface UserLayerMeta
   official?: boolean
 }
 
-export type UserLayerRef = {
+export type UserLayerMetaIndex = {
+  [id: string]: UserLayerMeta
+}
+
+export interface UserLayerRef
+{
   id: string,
   fill: boolean,
   stroke: boolean,
