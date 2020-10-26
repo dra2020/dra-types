@@ -226,7 +226,7 @@ export function blockmapToVTDmap(blockMap: BlockMapping, stateMap: BlockMapping)
       else
       {
         geoid = id.substr(0, 12); // heuristic for mapping blockID to blockgroupID
-        if (revMap[geoid] === undefined)
+        if (stateMap && revMap[geoid] === undefined)
         {
           res.outValid = false;
           break;
