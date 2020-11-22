@@ -292,6 +292,7 @@ export const GEOIDToState: any = {
   '08': 'CO',
   '09': 'CT',
   '10': 'DE',
+  '11': 'DC',
   '12': 'FL',
   '13': 'GA',
   '15': 'HI',
@@ -334,6 +335,7 @@ export const GEOIDToState: any = {
   '54': 'WV',
   '55': 'WI',
   '56': 'WY',
+  '72': 'PR',
 };
 
 export const StateToGEOID: any = {
@@ -345,6 +347,7 @@ export const StateToGEOID: any = {
   'CO': '08',
   'CT': '09',
   'DE': '10',
+  'DC': '11',
   'FL': '12',
   'GA': '13',
   'HI': '15',
@@ -387,6 +390,7 @@ export const StateToGEOID: any = {
   'WV': '54',
   'WI': '55',
   'WY': '56',
+  'PR': '72',
 };
 
 export function geoidToState(geoid: string): string
@@ -407,6 +411,7 @@ export type StateUrls = (
   'colorado' |
   'connecticut' |
   'delaware' |
+  'district-of-columbia' |
   'florida' |
   'georgia' |
   'hawaii' |
@@ -448,7 +453,8 @@ export type StateUrls = (
   'washington' |
   'west-virginia' |
   'wisconsin' |
-  'wyoming'
+  'wyoming' |
+  'puerto-rico'
 );
 
 export type ValidStateUrlsType =
@@ -465,6 +471,7 @@ const ValidStateUrls: ValidStateUrlsType = {
   'colorado': true,
   'connecticut': true,
   'delaware': true,
+  'district-of-columbia': true,
   'florida': true,
   'georgia': true,
   'hawaii': true,
@@ -507,6 +514,7 @@ const ValidStateUrls: ValidStateUrlsType = {
   'west-virginia': true,
   'wisconsin': true,
   'wyoming': true,
+  'puerto-rico': true,
 };
 
 export function isStateUrl(s: any): s is StateUrls
