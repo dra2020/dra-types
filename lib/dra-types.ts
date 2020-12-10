@@ -37,3 +37,8 @@ export interface UserLikes
   id?: string;
   [aid: string]: Like | string;     // Really just Like but make TypeScript happy
 }
+
+// Type of redistricting plan (Note: 'upper' is used when there is only 1 legislative map or body)
+// congress, upper, lower and other => the plan is for entire state
+// county and city => plan is for a single county or city within a state
+export type PlanType = 'congress' | 'upper' | 'lower' | 'county' | 'city' | 'other';

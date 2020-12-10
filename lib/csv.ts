@@ -283,7 +283,7 @@ export function blockmapToVTDmap(blockMap: BlockMapping, stateMap: BlockMapping)
   return res;
 }
 
-export const GEOIDToState: any = {
+export const StateIdToStateCode: any = {
   '01': 'AL',
   '02': 'AK',
   '04': 'AZ',
@@ -338,7 +338,7 @@ export const GEOIDToState: any = {
   '72': 'PR',
 };
 
-export const StateToGEOID: any = {
+export const StateCodeToStateId: any = {
   'AL': '01',
   'AK': '02',
   'AZ': '04',
@@ -399,7 +399,7 @@ export function geoidToState(geoid: string): string
 
   let a = re.exec(geoid);
   if (a == null || a.length != 2) return null;
-  return GEOIDToState[a[1]];
+  return StateIdToStateCode[a[1]];
 }
 
 export type StateUrls = (
@@ -457,12 +457,12 @@ export type StateUrls = (
   'puerto-rico'
 );
 
-export type ValidStateUrlsType =
+export type ValidStateNamesForUrlType =
 {
   readonly [stateUrl in StateUrls]: boolean;
 };
 
-const ValidStateUrls: ValidStateUrlsType = {
+const ValidStateNamesForUrl: ValidStateNamesForUrlType = {
   'alabama': true,
   'alaska': true,
   'arizona': true,
@@ -517,7 +517,7 @@ const ValidStateUrls: ValidStateUrlsType = {
   'puerto-rico': true,
 };
 
-export function isStateUrl(s: any): s is StateUrls
+export function isValidStateNameForUrl(s: any): s is StateUrls
 {
-  return (typeof s === 'string' && s in ValidStateUrls);
+  return (typeof s === 'string' && s in ValidStateNamesForUrl);
 }
