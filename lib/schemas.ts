@@ -113,6 +113,8 @@ export let Schemas: any = {
     {},
   'livestats':
     {},
+  'workqueue':
+    {},
   'layer':
     {
       FileOptions: { map: true },
