@@ -1,5 +1,5 @@
 // Public libraries
-import * as Util from '@dra2020/util';
+import { Util } from '@dra2020/baseclient';
 
 // Local library
 import * as VF from './vfeature';
