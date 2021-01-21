@@ -5,11 +5,19 @@ export interface SplitBlock
 {
   id?: string;
   chunkKey?: string;
+  chunkList?: string[];
   chunk?: string;
   state: string;
   datasource: string;
   geoid: string;
   blocks: string[];
+}
+
+export interface SplitChunk
+{
+  id?: string;
+  recompute?: boolean;
+  splits?: string[];
 }
 
 export type DistrictToSplitBlock = { [districtID: string]: SplitBlock[] };
@@ -21,7 +29,8 @@ function hash(o: any): string
     { respectType: false,
       unorderedArrays: true,
       unorderedObjects: true,
-      excludeKeys: (k: string) => (k === 'id' || k === 'chunk')
+      // basically, include (state,datasource,geoid,blocks[])
+      excludeKeys: (k: string) => (k === 'id' || k === 'chunk' || k === 'chunkList' || k === 'chunkKey')
     });
 }
 

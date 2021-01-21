@@ -74,6 +74,30 @@ export let Schemas: any = {
           { chunkKey: 'HASH', id: 'RANGE' },
         ],
     },
+  'blockset':
+    {
+      FileOptions: { map: true },
+      Schema: {
+        id: 'S',
+        chunk: 'S',
+        chunkKey: 'S',
+        chunkList: 'L',
+        state: 'S',
+        datasource: 'S',
+        geoid: 'S',
+        blocks: 'L'
+      },
+      KeySchema: { id: 'HASH' },
+    },
+  'blockchunk':
+    {
+      FileOptions: { map: true },
+      Schema: {
+        id: 'S',
+        recompute: 'BOOL',
+        splits: 'L',
+      },
+    },
   'access':
     {
       FileOptions: { map: true, noobject: true },
