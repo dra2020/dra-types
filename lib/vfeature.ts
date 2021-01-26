@@ -87,6 +87,15 @@ export function splitToCacheKey(s: SplitBlock): string
   return `_${s.state}_${s.datasource}_vfeature_${s.geoid}_${s.chunk}_${s.id}.geojson`;
 }
 
+export function cacheKeyToSplit(s: string): SplitBlock
+{
+  let re = /^_(..)_(.*)_vfeature_([^_]+)_([^_]+)_([^_]+).geojson$/
+  let a = re.exec(s);
+  if (a == null) return null;
+  // 0: whole string, 1: statecode, 2: datasource, 3: geoid, 4: chunk, 5: id hash
+  return { id: a[5], state: a[1], datasource: a[2], geoid: a[3], chunk: a[4], blocks: null };
+}
+
 export function splitToChunkKey(s: SplitBlock): string
 {
   if (s.chunk === undefined)
