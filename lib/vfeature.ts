@@ -49,7 +49,7 @@ export function vgeoidToChunk(vgeoid: string): string
   // vgeoid is string of form: "vfeature_[geoid]_[chunkid]_[hash]"
   // the contents are chunked into a file of form "vfeature_chunk_[chunkid]"
   // So extract the chunk ID and download that.
-  let re = /vfeature_([^_]*)_([^_*])_(.*)/;
+  let re = /^vfeature_([^_]*)_([^_*])_(.*)$/;
   let a = re.exec(vgeoid);
   if (a && a.length == 4)
     vgeoid = `vfeature_chunk_${a[2]}`;
@@ -57,6 +57,15 @@ export function vgeoidToChunk(vgeoid: string): string
     vgeoid = null;
 
   return vgeoid;
+}
+
+export function vgeoidToSplit(state: string, datasource: string, vgeoid: string): SplitBlock
+{
+  let re = /^vfeature_([^_]*)_([^_*])_(.*)$/;
+  let a = re.exec(vgeoid);
+  if (a)
+    return { state: state, datasource: datasource, geoid: a[1], id: a[3], chunk: a[2], blocks: null };
+  return null;
 }
 
 export function vgeoidToHash(vgeoid: string): string
