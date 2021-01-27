@@ -44,6 +44,15 @@ export function vgeoidToGeoid(vgeoid: string): string
     return a[1];
 }
 
+export function splitToVgeoid(s: SplitBlock): string
+{
+  if (s.id === undefined)
+    s.id = hash(s);
+  if (s.chunk === undefined)
+    s.chunk = '0';
+  return `vfeature_${s.geoid}_${s.chunk}_${s.id}`;
+}
+
 export function vgeoidToChunk(vgeoid: string): string
 {
   // vgeoid is string of form: "vfeature_[geoid]_[chunkid]_[hash]"
