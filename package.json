@@ -1,6 +1,6 @@
 {
   "name": "@dra2020/dra-types",
-  "version": "1.7.4",
+  "version": "1.7.5",
   "description": "Shared types used between client, server and tools.",
   "main": "dist/dra-types.js",
   "types": "./dist/all.d.ts",
