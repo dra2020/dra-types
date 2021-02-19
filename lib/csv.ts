@@ -131,10 +131,17 @@ export interface OneCSVLine
 }
 
 let reArray = [
+  // comma-delimited
   /^(\d\d[^\s,"']*)[\s]*,[\s]*([^\s'"]+)[\s]*$/,
   /^["'](\d\d[^"']*)["'][\s]*,[\s]*["']([^"']*)["'][\s]*$/,
   /^(\d\d[^\s,]*)[\s]*,[\s]*["']([^"']*)["'][\s]*$/,
   /^["'](\d\d[^"']*)["'][\s]*,[\s]*([^\s]+)[\s]*$/,
+
+  // pipe-delimited, new 2020 Census Bureau format
+  /^(\d\d[^\s\|"']*)[\s]*\|[\s]*([^\s'"]+)[\s]*$/,
+  /^["'](\d\d[^"']*)["'][\s]*\|[\s]*["']([^"']*)["'][\s]*$/,
+  /^(\d\d[^\s\|]*)[\s]*\|[\s]*["']([^"']*)["'][\s]*$/,
+  /^["'](\d\d[^"']*)["'][\s]*\|[\s]*([^\s]+)[\s]*$/,
   ];
 
 export function parseCSVLine(line: string): OneCSVLine
@@ -220,8 +227,10 @@ export function blockmapToVTDmap(blockMap: BlockMapping, stateBT: Util.BinTrie):
         geoid = stateBT.get(id);
       else
       {
-        res.outValid = false;
-        break;
+        //res.outValid = false;
+        //break;
+        //Actually, let's just ignore unknown blockIDs
+        continue;
       }
     }
     else
