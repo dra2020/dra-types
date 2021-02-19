@@ -152,7 +152,7 @@ export function parseCSVLine(line: string): OneCSVLine
 export interface ConvertResult
 {
   inBlockMap: BlockMapping;
-  inStateMap: BlockMapping;
+  inBinTrie: Util.BinTrie;
   outValid: boolean;
   outState: string;
   outMap: BlockMapping;
@@ -177,11 +177,11 @@ export function blockmapToState(blockMap: BlockMapping): string
 //  not all specify the same state, the mapping is considered invalid and the outValid flag is set to false.
 //
 
-export function blockmapToVTDmap(blockMap: BlockMapping, stateMap: BlockMapping): ConvertResult
+export function blockmapToVTDmap(blockMap: BlockMapping, stateBT: Util.BinTrie): ConvertResult
 {
   let res: ConvertResult = {
       inBlockMap: blockMap,
-      inStateMap: stateMap,
+      inBinTrie: stateBT,
       outValid: true,
       outState: null,
       outMap: {},
@@ -190,12 +190,7 @@ export function blockmapToVTDmap(blockMap: BlockMapping, stateMap: BlockMapping)
     };
 
   let bmGather: { [geoid: string]: { [district: string]: { [blockid: string]: boolean } } } = {};
-  let revMap: BlockMapping = {};
   let id: string;
-
-  if (stateMap)
-    for (id in stateMap) if (stateMap.hasOwnProperty(id))
-      revMap[stateMap[id]] = null;
 
   // First aggregate into features across all the blocks
   for (id in blockMap) if (blockMap.hasOwnProperty(id))
@@ -221,16 +216,12 @@ export function blockmapToVTDmap(blockMap: BlockMapping, stateMap: BlockMapping)
     // Simple test for block id (vs. voting district or block group) id
     if (n >= 15)
     {
-      if (stateMap && stateMap[id] !== undefined)
-        geoid = stateMap[id];
+      if (stateBT && stateBT.get(id) !== undefined)
+        geoid = stateBT.get(id);
       else
       {
-        geoid = id.substr(0, 12); // heuristic for mapping blockID to blockgroupID
-        if (stateMap && revMap[geoid] === undefined)
-        {
-          res.outValid = false;
-          break;
-        }
+        res.outValid = false;
+        break;
       }
     }
     else
