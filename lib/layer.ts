@@ -16,9 +16,12 @@ export type UserLayerMetaIndex = {
   [id: string]: UserLayerMeta
 }
 
+export type LayerType = 'layer' | 'map';
+
 export interface UserLayerRef
 {
   id: string,
+  layerType?: LayerType,
   fill: boolean,
   stroke: boolean,
   label: boolean
