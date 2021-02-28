@@ -111,7 +111,11 @@ export function canonicalDistrictIDOrdering(order: DistrictOrder): DistrictOrder
   let template: string = undefined;
 
   keys = keys.map((s: string) => canonicalSortingDistrictID(s));
-  keys = canonicalDistrictIDGapFill(keys);
+
+  // Let's omit this. Some official maps have odd numbering schemes and we don't
+  // want to generate anomalous spurious extra districts.
+  //keys = canonicalDistrictIDGapFill(keys);
+
   keys.sort();
   order = {};
   for (i = 0; i < keys.length; i++)
