@@ -117,3 +117,15 @@ export function getStateYearTotalPop(stateCode: string, datasource: string): num
   return stateYearInfo ? stateYearInfo['population'] : 0;
 }
 
+export function inferPlanType(stateCode: string, datasource: string, nDistricts: number, flex?: boolean): DT.PlanType
+{
+  // Intended for datasource === '2020_VD'
+  const congressCount: number = getPlanDistrictCount(stateCode, 'congress', datasource);
+  const upperCount: number = getPlanDistrictCount(stateCode, 'upper', datasource);
+  const lowerCount: number = getPlanDistrictCount(stateCode, 'lower', datasource);
+  return (
+    ((flex && nDistricts <= congressCount + 2 && nDistricts >= congressCount - 3) || nDistricts == congressCount) ? 'congress' :
+    (nDistricts == upperCount) ? 'upper' :
+    (nDistricts == lowerCount) ? 'lower' :
+    'other');
+}
