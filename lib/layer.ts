@@ -22,7 +22,7 @@ export interface UserLayerRef
 {
   id: string,
   layerType?: LayerType,
-  imageName?: string,
+  geojsonName?: string,
   fill: boolean,
   stroke: boolean,
   label: boolean
