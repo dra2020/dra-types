@@ -138,7 +138,31 @@ export let Schemas: any = {
   'livestats':
     {},
   'workqueue':
-    {},
+    {
+      FileOptions: { map: true },
+      Schema: {
+        id: 'S',
+        priority: 'N',
+        functionName: 'S',
+        params: 'M',
+      },
+      KeySchema: { id: 'HASH' },
+      GlobalSecondaryIndexes: [
+          { priority: 'HASH' },
+        ],
+    },
+  'failqueue':
+    {
+      FileOptions: { map: true },
+      Schema: {
+        id: 'S',
+        priority: 'N',
+        functionName: 'S',
+        params: 'M',
+        failType: 'S',
+      },
+      KeySchema: { id: 'HASH' },
+    },
   'layer':
     {
       FileOptions: { map: true },
