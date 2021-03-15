@@ -8,3 +8,4 @@ export * from './csv';
 export * from './stats';
 export * from './layer';
 export * from './stateinfo';
+export * from './workqueue';
