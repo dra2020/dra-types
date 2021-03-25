@@ -25,7 +25,8 @@ export interface UserLayerRef
   geojsonName?: string,
   fill: boolean,
   stroke: boolean,
-  label: boolean
+  label: boolean,
+  landmark: boolean,
   strokeColor: string,
   strokeOpacity: number,
   fillColor: string,
