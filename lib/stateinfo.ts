@@ -96,6 +96,8 @@ export function hasOneLegislativePlanBothHouses(stateCode: string): boolean
 
 export function getPlanDistrictCount(stateCode: string, planType: DT.PlanType, datasource: string): number
 {
+  if (planType === 'coi')
+    return 1;
   if (datasource === '2016_BG')
     datasource = '2010_VD';
   if ((datasource !== '2010_VD' && datasource !== '2020_VD') || (planType !== 'congress' && planType !== 'upper' && planType !== 'lower'))
