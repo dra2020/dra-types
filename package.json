@@ -1,6 +1,6 @@
 {
   "name": "@dra2020/dra-types",
-  "version": "1.8.15",
+  "version": "1.8.16",
   "description": "Shared types used between client, server and tools.",
   "main": "dist/dra-types.js",
   "types": "./dist/all.d.ts",
@@ -33,7 +33,7 @@
     "webpack-cli": "^4.3.1"
   },
   "dependencies": {
-    "@dra2020/baseclient": "^1.0.0",
+    "@dra2020/baseclient": "^1.0.12",
     "object-hash": "^2.1.1"
   }
 }
