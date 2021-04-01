@@ -22,9 +22,11 @@ export interface UserLayerRef
 {
   id: string,
   layerType?: LayerType,
+  geojsonName?: string,
   fill: boolean,
   stroke: boolean,
-  label: boolean
+  label: boolean,
+  landmark: boolean,
   strokeColor: string,
   strokeOpacity: number,
   fillColor: string,
