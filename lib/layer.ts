@@ -16,13 +16,14 @@ export type UserLayerMetaIndex = {
   [id: string]: UserLayerMeta
 }
 
-export type LayerType = 'layer' | 'map';
+export type LayerType = 'layer' | 'map' | 'restriction';
 
 export interface UserLayerRef
 {
   id: string,
   layerType?: LayerType,
   geojsonName?: string,
+  blockmapName?: string,
   fill: boolean,
   stroke: boolean,
   label: boolean,
