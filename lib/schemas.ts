@@ -57,6 +57,32 @@ export let Schemas: any = {
           { id: 'HASH' }
         ],  // sparse
     },
+  'expungestate':
+    {
+      FileOptions: { version: 7, name: 'sessions', map: true },
+      Schema: {
+        id: 'S',
+        name: 'S',
+        type: 'S',
+        description: 'S',
+        labels: 'L',
+        createdBy: 'S',
+        lastActive: 'S',
+        createTime: 'S',
+        modifyTime: 'S',
+        clientCount: 'N',
+        maxClients: 'N',
+        requestCount: 'N',
+        deleted: 'BOOL',
+        published: 'S',
+        official: 'BOOL',
+        loadFailed: 'BOOL',
+        accessMap: 'M',
+        revisions: 'L',
+        xprops: 'M',
+      },
+      KeySchema: { id: 'HASH' },
+    },
   'splitblock':
     {
       FileOptions: { map: true },
