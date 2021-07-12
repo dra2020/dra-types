@@ -21,6 +21,7 @@ export type LayerType = 'layer' | 'map' | 'restriction';
 export interface UserLayerRef
 {
   id: string,
+  name?: string,
   layerType?: LayerType,
   geojsonName?: string,
   blockmapName?: string,
