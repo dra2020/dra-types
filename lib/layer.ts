@@ -33,6 +33,7 @@ export interface UserLayerRef
   strokeOpacity: number,
   fillColor: string,
   fillOpacity: number,
+  lineWidth?: number,
 }
 
 export type UserLayerRefIndex = {
