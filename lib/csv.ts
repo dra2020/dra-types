@@ -201,10 +201,14 @@ export function blockmapToVTDmap(blockMap: BlockMapping, stateMap: BlockMapping)
     };
 
   let bmGather: { [geoid: string]: { [district: string]: { [blockid: string]: boolean } } } = {};
-  let revMap: BlockMapping = {};
+  let revMap: { [geoid: string]: string[] } = {};
   let id: string;
 
-  if (stateMap) Object.keys(stateMap).forEach(id => { revMap[stateMap[id]] = null });
+  if (stateMap) Object.keys(stateMap).forEach(blockid => {
+      let vtd = stateMap[blockid];
+      if (revMap[vtd] === undefined) revMap[vtd] = [];
+      revMap[vtd].push(blockid);
+    });
 
   // First aggregate into features across all the blocks
   for (id in blockMap) if (blockMap.hasOwnProperty(id))
@@ -235,7 +239,7 @@ export function blockmapToVTDmap(blockMap: BlockMapping, stateMap: BlockMapping)
       else
       {
         geoid = id.substr(0, 12);
-        if (stateMap && revMap[geoid] === undefined)
+        if (stateMap && !revMap[geoid])
         {
           res.outValid = false;
           break;
@@ -267,10 +271,15 @@ export function blockmapToVTDmap(blockMap: BlockMapping, stateMap: BlockMapping)
   for (let geoid in bmGather) if (bmGather.hasOwnProperty(geoid))
   {
     let districtToBlocks = bmGather[geoid];
+    let bWhole = false;
     if (Util.countKeys(districtToBlocks) == 1)
     {
-      res.outMap[geoid] = Util.nthKey(districtToBlocks);
+      let blocks = Object.keys(districtToBlocks[Util.nthKey(districtToBlocks)]);
+      if (revMap[geoid] && blocks.length === revMap[geoid].length)
+        bWhole = true;
     }
+    if (bWhole)
+      res.outMap[geoid] = Util.nthKey(districtToBlocks);
     else
     {
       for (let districtID in districtToBlocks) if (districtToBlocks.hasOwnProperty(districtID))
