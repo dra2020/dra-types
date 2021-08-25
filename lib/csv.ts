@@ -275,7 +275,7 @@ export function blockmapToVTDmap(blockMap: BlockMapping, stateMap: BlockMapping)
     if (Util.countKeys(districtToBlocks) == 1)
     {
       let blocks = Object.keys(districtToBlocks[Util.nthKey(districtToBlocks)]);
-      if (revMap[geoid] && blocks.length === revMap[geoid].length)
+      if (blocks[0] === geoid || (revMap[geoid] && blocks.length === revMap[geoid].length))
         bWhole = true;
     }
     if (bWhole)
