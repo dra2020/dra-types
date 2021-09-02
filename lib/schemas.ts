@@ -114,6 +114,9 @@ export let Schemas: any = {
         blocks: 'L'
       },
       KeySchema: { id: 'HASH' },
+      GlobalSecondaryIndexes: [
+          { state: 'HASH' },
+        ],
     },
   'blockchunk':
     {
