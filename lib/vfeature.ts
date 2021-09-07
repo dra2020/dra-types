@@ -23,7 +23,7 @@ export interface SplitChunk
 export type DistrictToSplitBlock = { [districtID: string]: SplitBlock[] };
 
 // Canonical hashing of splitblock data
-function hash(o: any): string
+export function vhash(o: any): string
 {
   return Hash(o,
     { respectType: false,
@@ -47,7 +47,7 @@ export function vgeoidToGeoid(vgeoid: string): string
 export function splitToVgeoid(s: SplitBlock): string
 {
   if (s.id === undefined)
-    s.id = hash(s);
+    s.id = vhash(s);
   if (s.chunk === undefined)
     s.chunk = '0';
   return `vfeature_${s.geoid}_${s.chunk}_${s.id}`;
@@ -98,7 +98,7 @@ export function isVfeature(geoid: string): boolean
 export function splitToCacheKey(s: SplitBlock): string
 {
   if (s.id === undefined)
-    s.id = hash(s);
+    s.id = vhash(s);
   if (s.chunk === undefined)
     s.chunk = "0";
 
@@ -137,5 +137,5 @@ export function splitToPrefix(s: SplitBlock): string
 
 export function cacheKeysToChunkHash(keys: string[]): string
 {
-  return hash(keys);
+  return vhash(keys);
 }
