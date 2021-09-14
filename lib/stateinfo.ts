@@ -63,7 +63,7 @@ export const StatePlanInfoMap: {[key: string]: StateInfo} = {
   "VT": {"2010_VD": {population: 625741, congress: {nDistricts: 1}, upper: {nDistricts: 13}, lower: {nDistricts: 104}}, "2020_VD": {population: 6, congress: {nDistricts: 1}, upper: {nDistricts: 13}, lower: {nDistricts: 104}}},
   "VA": {"2010_VD": {population: 8001024, congress: {nDistricts: 11}, upper: {nDistricts: 40}, lower: {nDistricts: 100}}, "2020_VD": {population: 6, congress: {nDistricts: 11}, upper: {nDistricts: 40}, lower: {nDistricts: 100}}},
   "WA": {"2010_VD": {population: 6724540, congress: {nDistricts: 10}, upper: {nDistricts: 49}}, "2020_VD": {population: 6, congress: {nDistricts: 10}, upper: {nDistricts: 49}}},
-  "WV": {"2010_VD": {population: 1852994, congress: {nDistricts: 3}, upper: {nDistricts: 17}, lower: {nDistricts: 67}}, "2020_VD": {population: 6, congress: {nDistricts: 2}, upper: {nDistricts: 17}, lower: {nDistricts: 67}}},
+  "WV": {"2010_VD": {population: 1852994, congress: {nDistricts: 3}, upper: {nDistricts: 17}, lower: {nDistricts: 67}}, "2020_VD": {population: 6, congress: {nDistricts: 2}, upper: {nDistricts: 17}, lower: {nDistricts: 100}}},
   "WI": {"2010_VD": {population: 5686986, congress: {nDistricts: 8}, upper: {nDistricts: 33}, lower: {nDistricts: 99}}, "2020_VD": {population: 6, congress: {nDistricts: 8}, upper: {nDistricts: 33}, lower: {nDistricts: 99}}},
   "WY": {"2010_VD": {population: 563626, congress: {nDistricts: 1}, upper: {nDistricts: 30}, lower: {nDistricts: 60}}, "2020_VD": {population: 6, congress: {nDistricts: 1}, upper: {nDistricts: 30}, lower: {nDistricts: 60}}},
   "DC": {"2010_VD": {population: 601723, congress: {nDistricts: 1}, upper: {nDistricts: 8}}, "2020_VD": {population: 6, congress: {nDistricts: 1}, upper: {nDistricts: 8}}},
