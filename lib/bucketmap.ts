@@ -25,4 +25,6 @@ export const BucketMap: any =
     'transfers-dev': 'dra-transfers-dev',
     'downloads': 'dra-uswest-downloads',
     'downloads-dev': 'dra-uswest-downloads',
+    'editcache': 'dra-uswest-editcache',
+    'editcache-dev': 'dra-uswest-editcache-dev',
   }
