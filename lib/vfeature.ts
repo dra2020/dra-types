@@ -10,7 +10,8 @@ export interface SplitBlock
   state: string;
   datasource: string;
   geoid: string;
-  blocks: string[];
+  blocks?: string[];
+  bitset?: string;
 }
 
 export interface SplitChunk
@@ -34,18 +35,31 @@ export function vhash(o: any): string
     });
 }
 
+// old style "vfeature_[geoid]_[numericchunk]_[id]"
+// new style "B_[geoid]_bitset"
+
 export function vgeoidToGeoid(vgeoid: string): string
 {
-  let re = /vfeature_([^_]*)_.*/;
-  let a = re.exec(vgeoid);
+  let reNew = /^B_([^_]*)_.*/;
+  let reOld = /^vfeature_([^_]*)_.*/;
+  let a = reNew.exec(vgeoid);
   if (a == null || a.length != 2)
-    return '';
-  else
+  {
+    a = reOld.exec(vgeoid);
+    if (a == null || a.length != 2)
+      return '';
     return a[1];
+  }
+  return a[1];
 }
 
 export function splitToVgeoid(s: SplitBlock): string
 {
+  // Newstyle
+  if (s.bitset)
+    return `B_${s.geoid}_${s.bitset}`;
+
+  // oldstyle
   if (s.id === undefined)
     s.id = vhash(s);
   if (s.chunk === undefined)
@@ -70,8 +84,12 @@ export function vgeoidToChunk(vgeoid: string): string
 
 export function vgeoidToSplit(state: string, datasource: string, vgeoid: string): SplitBlock
 {
-  let re = /^vfeature_([^_]*)_([^_*])_(.*)$/;
-  let a = re.exec(vgeoid);
+  let reNew = /^B_([^_]*)_(.*)$/;
+  let reOld = /^vfeature_([^_]*)_([^_*])_(.*)$/;
+  let a = reNew.exec(vgeoid);
+  if (a)
+    return { state: state, datasource: datasource, geoid: a[1], bitset: a[2] };
+  a = reOld.exec(vgeoid);
   if (a)
     return { state: state, datasource: datasource, geoid: a[1], id: a[3], chunk: a[2], blocks: null };
   return null;
@@ -80,7 +98,7 @@ export function vgeoidToSplit(state: string, datasource: string, vgeoid: string)
 export function vgeoidToHash(vgeoid: string): string
 {
   // vgeoid is string of form: "vfeature_[geoid]_[chunkid]_[hash]"
-  let re = /vfeature_([^_]*)_([^_*])_(.*)/;
+  let re = /^vfeature_([^_]*)_([^_*])_(.*)$/;
   let a = re.exec(vgeoid);
   if (a && a.length == 4)
     vgeoid = a[3];
@@ -92,11 +110,13 @@ export function vgeoidToHash(vgeoid: string): string
 
 export function isVfeature(geoid: string): boolean
 {
-  return geoid.indexOf('vfeature') === 0;
+  return geoid.indexOf('B') === 0 || geoid.indexOf('vfeature') === 0;
 }
 
 export function splitToCacheKey(s: SplitBlock): string
 {
+  if (s.bitset)
+    return null;
   if (s.id === undefined)
     s.id = vhash(s);
   if (s.chunk === undefined)
