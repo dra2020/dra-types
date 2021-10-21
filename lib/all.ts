@@ -10,3 +10,5 @@ export * from './layer';
 export * from './stateinfo';
 export * from './workqueue';
 export * from './landmark';
+export * from './splittogeofeature';
+export * from './reverse';

@@ -48,7 +48,6 @@ export function vgeoidToGeoid(vgeoid: string): string
     a = reOld.exec(vgeoid);
     if (a == null || a.length != 2)
       return '';
-    return a[1];
   }
   return a[1];
 }
@@ -65,6 +64,11 @@ export function splitToVgeoid(s: SplitBlock): string
   if (s.chunk === undefined)
     s.chunk = '0';
   return `vfeature_${s.geoid}_${s.chunk}_${s.id}`;
+}
+
+export function splitCommitted(s: SplitBlock): boolean
+{
+  return !!s.id || !!s.bitset;
 }
 
 export function vgeoidToChunk(vgeoid: string): string
