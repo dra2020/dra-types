@@ -36,6 +36,7 @@ export let Schemas: any = {
         type: 'S',
         description: 'S',
         labels: 'L',
+        flags: 'L',
         createdBy: 'S',
         lastActive: 'S',
         createTime: 'S',
