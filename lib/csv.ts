@@ -136,26 +136,50 @@ export interface OneCSVLine
 
 let reArray = [
   // comma-delimited
-  /^(\d\d[^\s,"']*)[\s]*,[\s]*([^\s'"]+)[\s]*$/,
-  /^["'](\d\d[^"']*)["'][\s]*,[\s]*["']([^"']*)["'][\s]*$/,
-  /^(\d\d[^\s,]*)[\s]*,[\s]*["']([^"']*)["'][\s]*$/,
-  /^["'](\d\d[^"']*)["'][\s]*,[\s]*([^\s]+)[\s]*$/,
+  /^(\d\d[^\s,']*)[\s]*,[\s]*([^\s']+)[\s]*$/,
+  /^(\d\d[^\s,"]*)[\s]*,[\s]*([^\s"]+)[\s]*$/,
+  /^['](\d\d[^']*)['][\s]*,[\s]*[']([^']*)['][\s]*$/,
+  /^["](\d\d[^"]*)["][\s]*,[\s]*["]([^"]*)["][\s]*$/,
+  /^(\d\d[^\s,]*)[\s]*,[\s]*[']([^']*)['][\s]*$/,
+  /^(\d\d[^\s,]*)[\s]*,[\s]*["]([^"]*)["][\s]*$/,
+  /^['](\d\d[^']*)['][\s]*,[\s]*([^\s]+)[\s]*$/,
+  /^["](\d\d[^"]*)["][\s]*,[\s]*([^\s]+)[\s]*$/,
 
   // pipe-delimited, new 2020 Census Bureau format
-  /^(\d\d[^\s\|"']*)[\s]*\|[\s]*([^\s'"]+)[\s]*$/,
-  /^["'](\d\d[^"']*)["'][\s]*\|[\s]*["']([^"']*)["'][\s]*$/,
-  /^(\d\d[^\s\|]*)[\s]*\|[\s]*["']([^"']*)["'][\s]*$/,
-  /^["'](\d\d[^"']*)["'][\s]*\|[\s]*([^\s]+)[\s]*$/,
+  /^(\d\d[^\s\|']*)[\s]*\|[\s]*([^\s']+)[\s]*$/,
+  /^(\d\d[^\s\|"]*)[\s]*\|[\s]*([^\s"]+)[\s]*$/,
+  /^['](\d\d[^']*)['][\s]*\|[\s]*[']([^']*)['][\s]*$/,
+  /^["](\d\d[^"]*)["][\s]*\|[\s]*["]([^"]*)["][\s]*$/,
+  /^(\d\d[^\s\|]*)[\s]*\|[\s]*[']([^']*)['][\s]*$/,
+  /^(\d\d[^\s\|]*)[\s]*\|[\s]*["]([^"]*)["][\s]*$/,
+  /^['](\d\d[^']*)['][\s]*\|[\s]*([^\s]+)[\s]*$/,
+  /^["](\d\d[^"]*)["][\s]*\|[\s]*([^\s]+)[\s]*$/,
   ];
+let reStart = 0;  // last successful regex
 
 export function parseCSVLine(line: string): OneCSVLine
 {
   if (line == null || line == '') return null;
-  for (let i: number = 0; i < reArray.length; i++)
+
+  // start at last successful parse so we don't have to
+  // iterate through all the regex's for each line.
+  for (let i = reStart; i < reArray.length; i++)
   {
     let a = reArray[i].exec(line);
     if (a && a.length === 3)
+    {
+      reStart = i;
       return { geoid: a[1], districtID: a[2] };
+    }
+  }
+  for (let i = 0; i < reStart; i++)
+  {
+    let a = reArray[i].exec(line);
+    if (a && a.length === 3)
+    {
+      reStart = i;
+      return { geoid: a[1], districtID: a[2] };
+    }
   }
   return null;
 }
