@@ -10,6 +10,11 @@ export type BlockMap = { [id: string]: number };
 // Used more generically and allows string districtIDs
 export type BlockMapping = { [id: string]: string };
 
+export type RevBlockMapping = { [id: string]: string[] };
+
+// Alternate block mapping (only supports <1 std>: <Many alt>)
+export type AltBlockMapping = { [blockid: string]: {[blockid: string]: number} }; // {stdblock: {altblock1: pop1, altblock2: pop2, ...}}
+
 let reNumeric = /^(\D*)(\d*)(\D*)$/;
 let reDistrictNumber = /^\d+$/;
 let reDistrictNumeric = /^\d/;
@@ -193,6 +198,11 @@ export interface ConvertResult
   outMap: BlockMapping;
   outOrder: DistrictOrder;
   outDistrictToSplit: VF.DistrictToSplitBlock;
+  nFeatures: number;
+  nSplitFromFeatures: number;
+  nSplitToFeatures: number;
+  nBlocks: number;
+  nSplitBlocks: number;
 }
 
 export function blockmapToState(blockMap: BlockMapping): string
@@ -212,7 +222,7 @@ export function blockmapToState(blockMap: BlockMapping): string
 //  not all specify the same state, the mapping is considered invalid and the outValid flag is set to false.
 //
 
-export function blockmapToVTDmap(blockMap: BlockMapping, stateMap: BlockMapping): ConvertResult
+export function blockmapToVTDmap(revMap: RevBlockMapping, blockMap: BlockMapping, stateMap: BlockMapping, altBlocks: AltBlockMapping): ConvertResult
 {
   let res: ConvertResult = {
       inBlockMap: blockMap,
@@ -221,21 +231,63 @@ export function blockmapToVTDmap(blockMap: BlockMapping, stateMap: BlockMapping)
       outState: null,
       outMap: {},
       outOrder: {},
-      outDistrictToSplit: {}
+      outDistrictToSplit: {},
+      nFeatures: 0,
+      nSplitFromFeatures: 0,
+      nSplitToFeatures: 0,
+      nBlocks: 0,
+      nSplitBlocks: 0,
     };
 
   let bmGather: { [geoid: string]: { [district: string]: { [blockid: string]: boolean } } } = {};
-  let revMap: { [geoid: string]: string[] } = {};
-  let id: string;
 
-  if (stateMap) Object.keys(stateMap).forEach(blockid => {
+  if (!revMap)
+  {
+    // Compute reverse map if we don't already have it
+    revMap = {};
+    if (stateMap) Object.keys(stateMap).forEach(blockid =>
+    {
       let vtd = stateMap[blockid];
       if (revMap[vtd] === undefined) revMap[vtd] = [];
       revMap[vtd].push(blockid);
     });
+  }
+
+  if (altBlocks)
+  {
+    // Create reverse of altBlocks if they exist   {altBlockid: {stdBlockid, pop}, ...}
+    let revAltBlocks: {[altBlockid: string]: {blockid: string, pop: number}} = {};
+    Object.keys(altBlocks).forEach(blockid =>
+    {
+      Object.keys(altBlocks[blockid]).forEach(altBlockid =>
+      {
+        revAltBlocks[altBlockid] = {blockid: blockid, pop: altBlocks[blockid][altBlockid]}
+      })
+    });
+    // Now walk input and build new blockMap with altBlocks replaced with stdBlocks
+    let blockMapP: BlockMapping = {};
+    let bestAlt: {[blockid: string]: {dist: string, pop: number}} = {};
+    for (var id in blockMap) if (blockMap.hasOwnProperty(id))
+    {
+      let n: number = id.length;
+      if (n >= 15 && !(stateMap && stateMap[id] !== undefined) && revAltBlocks[id])
+      {
+        if (!bestAlt[revAltBlocks[id].blockid] || bestAlt[revAltBlocks[id].blockid].pop < revAltBlocks[id].pop)
+        {
+          bestAlt[revAltBlocks[id].blockid] = {dist: blockMap[id], pop: revAltBlocks[id].pop};
+          blockMapP[revAltBlocks[id].blockid] = blockMap[id];
+        }
+      }
+      else
+      {
+        blockMapP[id] = blockMap[id];
+      }
+    }
+    blockMap = blockMapP;
+  }
 
   // First aggregate into features across all the blocks
-  for (id in blockMap) if (blockMap.hasOwnProperty(id))
+  for (var id in blockMap) if (blockMap.hasOwnProperty(id))
   {
     let state = geoidToState(id);
     if (res.outState == null)
@@ -254,6 +306,7 @@ export function blockmapToVTDmap(blockMap: BlockMapping, stateMap: BlockMapping)
 
     let n: number = id.length;
     let geoid: string;
+    res.nBlocks++;
 
     // Simple test for block id (vs. voting district or block group) id
     if (n >= 15)
@@ -303,12 +356,16 @@ export function blockmapToVTDmap(blockMap: BlockMapping, stateMap: BlockMapping)
         bWhole = true;
     }
     if (bWhole)
+    {
       res.outMap[geoid] = Util.nthKey(districtToBlocks);
+      res.nFeatures++;
+    }
     else
     {
       for (let districtID in districtToBlocks) if (districtToBlocks.hasOwnProperty(districtID))
       {
         let split: VF.SplitBlock = { state: '', datasource: '', geoid: geoid, blocks: Object.keys(districtToBlocks[districtID]) };
+        res.nSplitBlocks += split.blocks.length;
         let splits = res.outDistrictToSplit[districtID];
         if (splits === undefined)
         {
@@ -316,7 +373,10 @@ export function blockmapToVTDmap(blockMap: BlockMapping, stateMap: BlockMapping)
           res.outDistrictToSplit[districtID] = splits;
         }
         splits.push(split);
+        res.nFeatures++;
+        res.nSplitToFeatures++;
       }
+      res.nSplitFromFeatures++;
     }
   }
 
