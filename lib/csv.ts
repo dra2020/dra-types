@@ -3,6 +3,7 @@ import { Util } from '@dra2020/baseclient';
 
 // Local library
 import * as VF from './vfeature';
+import { reverseBlockMapping, reverseBlockgroupMapping } from './reverse';
 
 // Used internally to index into District Properties Array
 export type BlockMap = { [id: string]: number };
@@ -241,17 +242,8 @@ export function blockmapToVTDmap(revMap: RevBlockMapping, blockMap: BlockMapping
 
   let bmGather: { [geoid: string]: { [district: string]: { [blockid: string]: boolean } } } = {};
 
-  if (!revMap)
-  {
-    // Compute reverse map if we don't already have it
-    revMap = {};
-    if (stateMap) Object.keys(stateMap).forEach(blockid =>
-    {
-      let vtd = stateMap[blockid];
-      if (revMap[vtd] === undefined) revMap[vtd] = [];
-      revMap[vtd].push(blockid);
-    });
-  }
+  revMap = revMap || reverseBlockMapping(stateMap);
+  let revBG: RevBlockMapping; // lazy create on demand
 
   if (altBlocks)
   {
@@ -304,8 +296,12 @@ export function blockmapToVTDmap(revMap: RevBlockMapping, blockMap: BlockMapping
     if (districtID === 'ZZZ')
       continue;
 
+    if (res.outOrder[districtID] === undefined)
+      res.outOrder[districtID] = 0;
+
     let n: number = id.length;
     let geoid: string;
+    let ids: string[];
     res.nBlocks++;
 
     // Simple test for block id (vs. voting district or block group) id
@@ -322,26 +318,43 @@ export function blockmapToVTDmap(revMap: RevBlockMapping, blockMap: BlockMapping
           break;
         }
       }
+      ids = [id];
     }
-    else
-      geoid = id;
-
-    if (res.outOrder[districtID] === undefined)
-      res.outOrder[districtID] = 0;
-
-    let districtToBlocks: { [districtID: string]: { [blockid: string]: boolean } } = bmGather[geoid];
-    if (districtToBlocks === undefined)
-      bmGather[geoid] = { [districtID]: { [id]: true } };
+    else if (n == 12)
+    {
+      if (!revBG) revBG = reverseBlockgroupMapping(stateMap);
+      if (revBG[id])
+      {
+        ids = revBG[id];
+        geoid = stateMap[ids[0]];
+      }
+      else
+      {
+        geoid = id;
+        ids = [id];
+      }
+    }
     else
     {
-      let thisDistrict: { [blockid: string]: boolean } = districtToBlocks[districtID];
-      if (thisDistrict === undefined)
-      {
-        thisDistrict = { };
-        districtToBlocks[districtID] = thisDistrict;
-      }
-      thisDistrict[id] = true;
+      geoid = id;
+      ids = [id];
     }
+
+    ids.forEach(id => {
+        let districtToBlocks: { [districtID: string]: { [blockid: string]: boolean } } = bmGather[geoid];
+        if (districtToBlocks === undefined)
+          bmGather[geoid] = { [districtID]: { [id]: true } };
+        else
+        {
+          let thisDistrict: { [blockid: string]: boolean } = districtToBlocks[districtID];
+          if (thisDistrict === undefined)
+          {
+            thisDistrict = { };
+            districtToBlocks[districtID] = thisDistrict;
+          }
+          thisDistrict[id] = true;
+        }
+    });
   }
 
   // Now determine actual mapping of blocks to features, looking for split features
