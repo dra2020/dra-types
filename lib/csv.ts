@@ -300,25 +300,25 @@ export function blockmapToVTDmap(revMap: RevBlockMapping, blockMap: BlockMapping
       res.outOrder[districtID] = 0;
 
     let n: number = id.length;
-    let geoid: string;
+    let geoids: string[];
     let ids: string[];
     res.nBlocks++;
 
     // Simple test for block id (vs. voting district or block group) id
     if (n >= 15)
     {
+      ids = [id];
       if (stateMap && stateMap[id] !== undefined)
-        geoid = stateMap[id];
+        geoids = [stateMap[id]];
       else
       {
-        geoid = id.substr(0, 12);
-        if (stateMap && !revMap[geoid])
+        geoids = [id.substr(0, 12)];
+        if (stateMap && !revMap[geoids[0]])
         {
           res.outValid = false;
           break;
         }
       }
-      ids = [id];
     }
     else if (n == 12)
     {
@@ -326,21 +326,22 @@ export function blockmapToVTDmap(revMap: RevBlockMapping, blockMap: BlockMapping
       if (revBG[id])
       {
         ids = revBG[id];
-        geoid = stateMap[ids[0]];
+        geoids = ids.map(id => stateMap[id]);
       }
       else
       {
-        geoid = id;
         ids = [id];
+        geoids = [id];
       }
     }
     else
     {
-      geoid = id;
       ids = [id];
+      geoids = [id];
     }
 
-    ids.forEach(id => {
+    ids.forEach((id: string, i: number) => {
+        let geoid = geoids[i];
         let districtToBlocks: { [districtID: string]: { [blockid: string]: boolean } } = bmGather[geoid];
         if (districtToBlocks === undefined)
           bmGather[geoid] = { [districtID]: { [id]: true } };
