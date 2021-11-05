@@ -19,6 +19,7 @@ export let Schemas: any = {
         accessed: 'M',
         likeID: 'S',
         visitData: 'M',
+        groups: 'M',
       },
       KeySchema: { id: 'HASH' },
       GlobalSecondaryIndexes: [
@@ -213,5 +214,35 @@ export let Schemas: any = {
           { published: 'HASH' },
           { id: 'HASH' }
         ],  // sparse
+    },
+  'groups':
+    {
+      FileOptions: { map: true },
+      Schema: {
+        id: 'S',
+        name: 'S',
+        description: 'S',
+      },
+      KeySchema: { id: 'HASH' },
+    },
+  'groupsusers':
+    {
+      FileOptions: { map: true },
+      Schema: {
+        id: 'S',
+        uid: 'S',
+        verified: 'BOOL',
+        seen: 'BOOL',
+      },
+      KeySchema: { id: 'HASH', uid: 'RANGE' },
+    },
+  'groupsmaps':
+    {
+      FileOptions: { map: true },
+      Schema: {
+        id: 'S',
+        sid: 'S',
+      },
+      KeySchema: { id: 'HASH', sid: 'RANGE' },
     },
 }
