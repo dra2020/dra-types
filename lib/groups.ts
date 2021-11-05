@@ -5,10 +5,10 @@ export interface Group
   description: string,
 }
 
-const GROUP_OWNER = 1;
-const GROUP_VERIFIED = 2;
-const GROUP_SEEN = 4;
-const GROUP_REMOVED = 8;
+export const GROUP_OWNER = 1;
+export const GROUP_VERIFIED = 2;
+export const GROUP_SEEN = 4;
+export const GROUP_REMOVED = 8;
 
 export interface GroupUser
 {
