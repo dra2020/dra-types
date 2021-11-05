@@ -52,6 +52,7 @@ export let Schemas: any = {
         accessMap: 'M',
         revisions: 'L',
         xprops: 'M',
+        groups: 'M',
       },
       KeySchema: { createdBy: 'HASH', id: 'RANGE' },
       GlobalSecondaryIndexes: [
@@ -231,8 +232,7 @@ export let Schemas: any = {
       Schema: {
         id: 'S',
         uid: 'S',
-        verified: 'BOOL',
-        seen: 'BOOL',
+        flags: 'N',
       },
       KeySchema: { id: 'HASH', uid: 'RANGE' },
     },
@@ -242,6 +242,7 @@ export let Schemas: any = {
       Schema: {
         id: 'S',
         sid: 'S',
+        permission: 'N',
       },
       KeySchema: { id: 'HASH', sid: 'RANGE' },
     },
