@@ -12,3 +12,4 @@ export * from './workqueue';
 export * from './landmark';
 export * from './splittogeofeature';
 export * from './reverse';
+export * from './groups';
