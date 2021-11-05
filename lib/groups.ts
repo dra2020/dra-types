@@ -26,3 +26,4 @@ export interface GroupMap
 
 export type GroupUserIndex = { [groupid: string]: number }; // GroupUser flags
 export type GroupMapIndex = { [groupid: string]: number };  // GroupMap permission
+export type GroupIndex = { [groupid: string]: Group };
