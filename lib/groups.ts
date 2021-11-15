@@ -11,7 +11,7 @@ export const GROUP_SEEN = 4;
 export const GROUP_REMOVED = 8;
 export const GROUP_BLOCKED = 16;
 
-function hideGroup(flags: number): boolean
+export function hideGroup(flags: number): boolean
 {
   return (flags & (GROUP_REMOVED|GROUP_BLOCKED)) != 0;
 }
