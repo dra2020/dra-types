@@ -10,10 +10,16 @@ export const GROUP_VERIFIED = 2;
 export const GROUP_SEEN = 4;
 export const GROUP_REMOVED = 8;
 export const GROUP_BLOCKED = 16;
+export const GROUP_ADMIN = 32;
 
 export function hideGroup(flags: number): boolean
 {
   return (flags & (GROUP_REMOVED|GROUP_BLOCKED)) != 0;
+}
+
+export function adminGroup(flags: number): boolean
+{
+  return (flags & (GROUP_ADMIN|GROUP_OWNER)) != 0;
 }
 
 export interface GroupUser

@@ -53,10 +53,12 @@ export let Schemas: any = {
         revisions: 'L',
         xprops: 'M',
         groups: 'M',
+        xid: 'S',
       },
       KeySchema: { createdBy: 'HASH', id: 'RANGE' },
       GlobalSecondaryIndexes: [
           { published: 'HASH' },
+          { xid: 'HASH' },
           { id: 'HASH' }
         ],  // sparse
     },
