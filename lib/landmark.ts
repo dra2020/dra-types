@@ -1,4 +1,4 @@
-import { G } from '@dra2020/baseclient';
+import { Util, G } from '@dra2020/baseclient';
 
 export interface Landmark
 {
@@ -31,4 +31,26 @@ export function landmarksToCollection(landmarks: Landmarks): G.GeoFeatureCollect
       col.features.push(f);
     });
   return col;
+}
+
+export function collectionToLandmarks(col: G.GeoFeatureCollection): Landmarks
+{
+  let landmarks: Landmarks = {};
+  if (col && col.features) col.features.forEach((f: G.GeoFeature) => {
+      if (f.geometry.type === 'Point')
+      {
+        let c: any = f.geometry.coordinates;
+        if (Array.isArray(c) && typeof c[0] === 'number' && typeof c[1] === 'number')
+        {
+          let landmark: Landmark = {
+            id: Util.createGuid(),
+            name: G.flexName(f),
+            description: f.properties.description || '',
+            coord: [c[0], c[1]],
+            };
+          landmarks[landmark.id] = landmark;
+        }
+      }
+    });
+  return landmarks;
 }
