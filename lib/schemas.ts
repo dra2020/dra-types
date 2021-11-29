@@ -20,6 +20,8 @@ export let Schemas: any = {
         likeID: 'S',
         visitData: 'M',
         groups: 'M',
+        cache: 'N',
+        cached: 'N',
       },
       KeySchema: { id: 'HASH' },
       GlobalSecondaryIndexes: [
@@ -247,5 +249,15 @@ export let Schemas: any = {
         permission: 'N',
       },
       KeySchema: { id: 'HASH', sid: 'RANGE' },
+    },
+  'notifications':
+    {
+      FileOptions: { map: true },
+      Schema: {
+        id: 'S',
+        createdBy: 'S',
+        message: 'S',
+      },
+      KeySchema: { createdBy: 'HASH', id: 'RANGE' },
     },
 }
