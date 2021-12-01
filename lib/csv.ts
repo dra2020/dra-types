@@ -1,5 +1,5 @@
 // Public libraries
-import { Util } from '@dra2020/baseclient';
+import { Util, CSV } from '@dra2020/baseclient';
 
 // Local library
 import * as VF from './vfeature';
@@ -188,6 +188,16 @@ export function parseCSVLine(line: string): OneCSVLine
     }
   }
   return null;
+}
+
+export function csvLine(coder: Util.Coder, line: string): OneCSVLine
+{
+  if (!coder || !line) return null;
+  let parse = new CSV.ParseOne(coder, line);
+  if (parse.length != 2) return null;
+  let re = /^\d\d/;
+  if (!re.exec(parse.fields[0])) return null;
+  return { geoid: parse.fields[0], districtID: parse.fields[1] };
 }
 
 export interface ConvertResult
