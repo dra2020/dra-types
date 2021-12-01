@@ -49,7 +49,7 @@ export const StatePlanInfoMap: {[key: string]: StateInfo} = {
   "NM": {"2010_VD": {population: 2059179, congress: {nDistricts: 3}, upper: {nDistricts: 42}, lower: {nDistricts: 70}}, "2020_VD": {population: 6, congress: {nDistricts: 3}, upper: {nDistricts: 42}, lower: {nDistricts: 70}}},
   "NY": {"2010_VD": {population: 19378102, congress: {nDistricts: 27}, upper: {nDistricts: 63}, lower: {nDistricts: 150}}, "2020_VD": {population: 6, congress: {nDistricts: 26}, upper: {nDistricts: 63}, lower: {nDistricts: 150}}},
   "NC": {"2010_VD": {population: 9535483, congress: {nDistricts: 13}, upper: {nDistricts: 50}, lower: {nDistricts: 120}}, "2020_VD": {population: 6, congress: {nDistricts: 14}, upper: {nDistricts: 50}, lower: {nDistricts: 120}}},
-  "ND": {"2010_VD": {population: 672591, congress: {nDistricts: 1}, upper: {nDistricts: 47}}, "2020_VD": {population: 6, congress: {nDistricts: 1}, upper: {nDistricts: 47}}},
+  "ND": {"2010_VD": {population: 672591, congress: {nDistricts: 1}, upper: {nDistricts: 47}}, "2020_VD": {population: 6, congress: {nDistricts: 1}, upper: {nDistricts: 47}, lower: {nDistricts: 49}}},
   "OH": {"2010_VD": {population: 11536504, congress: {nDistricts: 16}, upper: {nDistricts: 33}, lower: {nDistricts: 99}}, "2020_VD": {population: 6, congress: {nDistricts: 15}, upper: {nDistricts: 33}, lower: {nDistricts: 99}}},
   "OK": {"2010_VD": {population: 3751351, congress: {nDistricts: 5}, upper: {nDistricts: 48}, lower: {nDistricts: 101}}, "2020_VD": {population: 6, congress: {nDistricts: 5}, upper: {nDistricts: 48}, lower: {nDistricts: 101}}},
   "OR": {"2010_VD": {population: 3831074, congress: {nDistricts: 5}, upper: {nDistricts: 30}, lower: {nDistricts: 60}}, "2020_VD": {population: 6, congress: {nDistricts: 6}, upper: {nDistricts: 30}, lower: {nDistricts: 60}}},
@@ -92,7 +92,7 @@ export function hasPlanType(stateCode: string, planType: DT.PlanType, is2020?: b
 
 export function hasOneLegislativePlanBothHouses(stateCode: string): boolean
 {
-  return stateCode === 'AZ' || stateCode === 'ID' || stateCode === 'ND' || stateCode === 'NJ' || stateCode === 'WA';
+  return stateCode === 'AZ' || stateCode === 'ID' || stateCode === 'NJ' || stateCode === 'WA';
 }
 
 export function getPlanDistrictCount(stateCode: string, planType: DT.PlanType, datasource: string): number
