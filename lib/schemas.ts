@@ -260,4 +260,15 @@ export let Schemas: any = {
       },
       KeySchema: { createdBy: 'HASH', id: 'RANGE' },
     },
+  'cull':
+    {
+      FileOptions: { map: true },
+      Schema: {
+        id: 'S',
+        key: 'S',
+        bucket: 'S',
+        expires: 'S',
+      },
+      KeySchema: { id: 'HASH' },
+    },
 }
