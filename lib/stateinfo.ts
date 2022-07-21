@@ -14,7 +14,6 @@ export interface StateInfo
   '2020_VD': StateYearInfo,
 }
 
-// TODO: 2020 Congress nDistricts are apportionment estimates (https://www.electiondataservices.com/wp-content/uploads/2020/12/2020ApportionmentTablesMaps.pdf) Update when apportionment happens
 export const StatePlanInfoMap: {[key: string]: StateInfo} = {
   "AL": {"2010_VD": {population: 4779736, congress: {nDistricts: 7}, upper: {nDistricts: 35}, lower: {nDistricts: 105}}, "2020_VD": { population: 0, congress: {nDistricts: 7}, upper: {nDistricts: 35}, lower: {nDistricts: 105}}},
   "AK": {"2010_VD": {population: 710231, congress: {nDistricts: 1}, upper: {nDistricts: 20}, lower: {nDistricts: 40}}, "2020_VD": {population: 0, congress: {nDistricts: 1}, upper: {nDistricts: 20}, lower: {nDistricts: 40}}},
@@ -44,7 +43,7 @@ export const StatePlanInfoMap: {[key: string]: StateInfo} = {
   "MT": {"2010_VD": {population: 989415, congress: {nDistricts: 1}, upper: {nDistricts: 50}, lower: {nDistricts: 100}}, "2020_VD": {population: 6, congress: {nDistricts: 2}, upper: {nDistricts: 50}, lower: {nDistricts: 100}}},
   "NE": {"2010_VD": {population: 1826341, congress: {nDistricts: 3}, upper: {nDistricts: 49}}, "2020_VD": {population: 6, congress: {nDistricts: 3}, upper: {nDistricts: 49}}},
   "NV": {"2010_VD": {population: 2700551, congress: {nDistricts: 4}, upper: {nDistricts: 21}, lower: {nDistricts: 42}}, "2020_VD": {population: 6, congress: {nDistricts: 4}, upper: {nDistricts: 21}, lower: {nDistricts: 42}}},
-  "NH": {"2010_VD": {population: 1316470, congress: {nDistricts: 2}, upper: {nDistricts: 24}, lower: {nDistricts: 161}}, "2020_VD": {population: 6, congress: {nDistricts: 2}, upper: {nDistricts: 24}, lower: {nDistricts: 161}}},
+  "NH": {"2010_VD": {population: 1316470, congress: {nDistricts: 2}, upper: {nDistricts: 24}, lower: {nDistricts: 161}}, "2020_VD": {population: 6, congress: {nDistricts: 2}, upper: {nDistricts: 24}, lower: {nDistricts: 164}}},
   "NJ": {"2010_VD": {population: 8791894, congress: {nDistricts: 12}, upper: {nDistricts: 40}}, "2020_VD": {population: 6, congress: {nDistricts: 12}, upper: {nDistricts: 40}}},
   "NM": {"2010_VD": {population: 2059179, congress: {nDistricts: 3}, upper: {nDistricts: 42}, lower: {nDistricts: 70}}, "2020_VD": {population: 6, congress: {nDistricts: 3}, upper: {nDistricts: 42}, lower: {nDistricts: 70}}},
   "NY": {"2010_VD": {population: 19378102, congress: {nDistricts: 27}, upper: {nDistricts: 63}, lower: {nDistricts: 150}}, "2020_VD": {population: 6, congress: {nDistricts: 26}, upper: {nDistricts: 63}, lower: {nDistricts: 150}}},
@@ -65,7 +64,7 @@ export const StatePlanInfoMap: {[key: string]: StateInfo} = {
   "WA": {"2010_VD": {population: 6724540, congress: {nDistricts: 10}, upper: {nDistricts: 49}}, "2020_VD": {population: 6, congress: {nDistricts: 10}, upper: {nDistricts: 49}}},
   "WV": {"2010_VD": {population: 1852994, congress: {nDistricts: 3}, upper: {nDistricts: 17}, lower: {nDistricts: 67}}, "2020_VD": {population: 6, congress: {nDistricts: 2}, upper: {nDistricts: 17}, lower: {nDistricts: 100}}},
   "WI": {"2010_VD": {population: 5686986, congress: {nDistricts: 8}, upper: {nDistricts: 33}, lower: {nDistricts: 99}}, "2020_VD": {population: 6, congress: {nDistricts: 8}, upper: {nDistricts: 33}, lower: {nDistricts: 99}}},
-  "WY": {"2010_VD": {population: 563626, congress: {nDistricts: 1}, upper: {nDistricts: 30}, lower: {nDistricts: 60}}, "2020_VD": {population: 6, congress: {nDistricts: 1}, upper: {nDistricts: 30}, lower: {nDistricts: 60}}},
+  "WY": {"2010_VD": {population: 563626, congress: {nDistricts: 1}, upper: {nDistricts: 30}, lower: {nDistricts: 60}}, "2020_VD": {population: 6, congress: {nDistricts: 1}, upper: {nDistricts: 31}, lower: {nDistricts: 62}}},
   "DC": {"2010_VD": {population: 601723, congress: {nDistricts: 1}, upper: {nDistricts: 8}}, "2020_VD": {population: 6, congress: {nDistricts: 1}, upper: {nDistricts: 8}}},
   "PR": {"2010_VD": {population: 0, congress: {nDistricts: 1}, upper: {nDistricts: 1}}, "2020_VD": {population: 0, congress: {nDistricts: 1}, upper: {nDistricts: 1}}},
 };
