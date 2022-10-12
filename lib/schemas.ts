@@ -271,4 +271,29 @@ export let Schemas: any = {
       },
       KeySchema: { id: 'HASH' },
     },
+  'precincts':
+    {
+      FileOptions: { map: true },
+      Schema: {
+        id: 'S',
+        hash: 'S',
+        state: 'S',
+        datasource: 'S',
+        name: 'S',
+        description: 'S',
+        labels: 'L',
+        createdBy: 'S',
+        createTime: 'S',
+        modifyTime: 'S',
+        deleted: 'BOOL',
+        published: 'S',
+        official: 'BOOL',
+      },
+      KeySchema: { createdBy: 'HASH', id: 'RANGE' },
+      GlobalSecondaryIndexes: [
+          { published: 'HASH' },
+          { id: 'HASH' },
+          { hash: 'HASH' }
+        ],  // sparse
+    },
 }
