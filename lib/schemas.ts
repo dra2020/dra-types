@@ -276,7 +276,6 @@ export let Schemas: any = {
       FileOptions: { map: true },
       Schema: {
         id: 'S',
-        hash: 'S',
         state: 'S',
         datasource: 'S',
         name: 'S',
@@ -291,9 +290,8 @@ export let Schemas: any = {
       },
       KeySchema: { createdBy: 'HASH', id: 'RANGE' },
       GlobalSecondaryIndexes: [
-          { published: 'HASH' },
           { id: 'HASH' },
-          { hash: 'HASH' }
+          { published: 'HASH' },
         ],  // sparse
     },
 }
