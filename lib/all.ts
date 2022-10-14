@@ -13,3 +13,4 @@ export * from './landmark';
 export * from './splittogeofeature';
 export * from './reverse';
 export * from './groups';
+export * from './precincts';
