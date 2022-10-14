@@ -16,7 +16,7 @@ export type UserLayerMetaIndex = {
   [id: string]: UserLayerMeta
 }
 
-export type LayerType = 'layer' | 'map' | 'restriction';
+export type LayerType = 'layer' | 'map' | 'restriction' | 'precincts';
 
 export interface UserLayerRef
 {
