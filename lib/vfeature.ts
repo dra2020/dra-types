@@ -26,8 +26,7 @@ export type DistrictToSplitBlock = { [districtID: string]: SplitBlock[] };
 // Canonical hashing of custom precinct
 export function chash(o: any): string
 {
-  return 
-    `cust${Hash(o,
+  return `cust${Hash(o,
       { respectType: false, unorderedArrays: true, unorderedObjects: true,
         excludeKeys: (k: string) => (k === 'id')
       })}`;
