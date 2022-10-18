@@ -26,14 +26,13 @@ export type DistrictToSplitBlock = { [districtID: string]: SplitBlock[] };
 // Canonical hashing of custom precinct
 export function chash(o: any): string
 {
-  return `cust${Hash(o,
-      { respectType: false, unorderedArrays: true, unorderedObjects: true,
-        excludeKeys: (k: string) => (k === 'id')
-      })}`;
+  return Hash(o, { respectType: false, unorderedArrays: true, unorderedObjects: true,
+                   excludeKeys: (k: string) => (k === 'id') });
 }
 
-// Is custom feature
-let reC = /^cust.*$/;
+// Is custom feature - 5 digit county id + 'cust' + hash
+let reC = /^\d\d\d\d\dcust.*$/;
+
 export function isCfeature(id: string): boolean
 {
   return id && reC.test(id);
