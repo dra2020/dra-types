@@ -3,7 +3,7 @@ import { Util, CSV } from '@dra2020/baseclient';
 
 // Local library
 import * as VF from './vfeature';
-import { reverseBlockMapping, reverseBlockgroupMapping } from './reverse';
+import { reverseBlockMapping, reverseBlockgroupMapping, reverseTractMapping } from './reverse';
 
 // Used internally to index into District Properties Array
 export type BlockMap = { [id: string]: number };
@@ -254,6 +254,7 @@ export function blockmapToVTDmap(revMap: RevBlockMapping, blockMap: BlockMapping
 
   revMap = revMap || reverseBlockMapping(stateMap);
   let revBG: RevBlockMapping; // lazy create on demand
+  let revTract: RevBlockMapping; // lazy create on demand
 
   if (altBlocks)
   {
@@ -336,6 +337,20 @@ export function blockmapToVTDmap(revMap: RevBlockMapping, blockMap: BlockMapping
       if (revBG[id])
       {
         ids = revBG[id];
+        geoids = ids.map(id => stateMap[id]);
+      }
+      else
+      {
+        ids = [id];
+        geoids = [id];
+      }
+    }
+    else if (n == 11)
+    {
+      if (!revTract) revTract = reverseTractMapping(stateMap);
+      if (revTract[id])
+      {
+        ids = revTract[id];
         geoids = ids.map(id => stateMap[id]);
       }
       else
