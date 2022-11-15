@@ -345,20 +345,6 @@ export function blockmapToVTDmap(revMap: RevBlockMapping, blockMap: BlockMapping
         geoids = [id];
       }
     }
-    else if (n == 11)
-    {
-      if (!revTract) revTract = reverseTractMapping(stateMap);
-      if (revTract[id])
-      {
-        ids = revTract[id];
-        geoids = ids.map(id => stateMap[id]);
-      }
-      else
-      {
-        ids = [id];
-        geoids = [id];
-      }
-    }
     else
     {
       ids = [id];
