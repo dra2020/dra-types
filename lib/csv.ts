@@ -1,9 +1,8 @@
 // Public libraries
-import { Util, CSV } from '@dra2020/baseclient';
+import { Util, CSV, G } from '@dra2020/baseclient';
 
 // Local library
 import * as VF from './vfeature';
-import { reverseBlockMapping, reverseBlockgroupMapping, reverseTractMapping } from './reverse';
 
 // Used internally to index into District Properties Array
 export type BlockMap = { [id: string]: number };
@@ -31,6 +30,23 @@ export function canonicalDistrictID(districtID: string): string
     districtID = `${a[1]}${a[2]}${a[3]}`;
   }
   return districtID;
+}
+
+function reverseSubMapping(mbm: G.MultiBlockMapping, n: number): G.ReverseBlockMapping
+{
+  let rev: any = {};
+
+  mbm.forEach(blockid => {
+      let geoid = blockid.substr(0, n);
+      if (! rev[geoid]) rev[geoid] = [];
+      rev[geoid].push(blockid);
+    });
+  return rev;
+}
+
+function reverseBlockgroupMapping(mbm: G.MultiBlockMapping): G.ReverseBlockMapping
+{
+  return reverseSubMapping(mbm, 12);
 }
 
 // Normalize any numeric part to have four digits with padded leading zeros
@@ -203,7 +219,7 @@ export function csvLine(coder: Util.Coder, line: string): OneCSVLine
 export interface ConvertResult
 {
   inBlockMap: BlockMapping;
-  inStateMap: BlockMapping;
+  inMbm: G.MultiBlockMapping;
   outValid: boolean;
   outState: string;
   outMap: BlockMapping;
@@ -233,11 +249,11 @@ export function blockmapToState(blockMap: BlockMapping): string
 //  not all specify the same state, the mapping is considered invalid and the outValid flag is set to false.
 //
 
-export function blockmapToVTDmap(revMap: RevBlockMapping, blockMap: BlockMapping, stateMap: BlockMapping, altBlocks: AltBlockMapping): ConvertResult
+export function blockmapToVTDmap(blockMap: BlockMapping, mbm: G.MultiBlockMapping, altBlocks: AltBlockMapping): ConvertResult
 {
   let res: ConvertResult = {
       inBlockMap: blockMap,
-      inStateMap: stateMap,
+      inMbm: mbm,
       outValid: true,
       outState: null,
       outMap: {},
@@ -252,9 +268,7 @@ export function blockmapToVTDmap(revMap: RevBlockMapping, blockMap: BlockMapping
 
   let bmGather: { [geoid: string]: { [district: string]: { [blockid: string]: boolean } } } = {};
 
-  revMap = revMap || reverseBlockMapping(stateMap);
   let revBG: RevBlockMapping; // lazy create on demand
-  let revTract: RevBlockMapping; // lazy create on demand
 
   if (altBlocks)
   {
@@ -273,7 +287,7 @@ export function blockmapToVTDmap(revMap: RevBlockMapping, blockMap: BlockMapping
     for (var id in blockMap) if (blockMap.hasOwnProperty(id))
     {
       let n: number = id.length;
-      if (n >= 15 && !(stateMap && stateMap[id] !== undefined) && revAltBlocks[id])
+      if (n >= 15 && !(mbm && mbm.map(id) !== undefined) && revAltBlocks[id])
       {
         if (!bestAlt[revAltBlocks[id].blockid] || bestAlt[revAltBlocks[id].blockid].pop < revAltBlocks[id].pop)
         {
@@ -319,12 +333,12 @@ export function blockmapToVTDmap(revMap: RevBlockMapping, blockMap: BlockMapping
     if (n >= 15)
     {
       ids = [id];
-      if (stateMap && stateMap[id] !== undefined)
-        geoids = [stateMap[id]];
+      if (mbm && mbm.map(id) !== undefined)
+        geoids = [mbm.map(id)];
       else
       {
         geoids = [id.substr(0, 12)];
-        if (stateMap && !revMap[geoids[0]])
+        if (mbm && !mbm.rev(geoids[0]))
         {
           res.outValid = false;
           break;
@@ -333,11 +347,11 @@ export function blockmapToVTDmap(revMap: RevBlockMapping, blockMap: BlockMapping
     }
     else if (n == 12)
     {
-      if (!revBG) revBG = reverseBlockgroupMapping(stateMap);
+      if (!revBG) revBG = reverseBlockgroupMapping(mbm);
       if (revBG[id])
       {
         ids = revBG[id];
-        geoids = ids.map(id => stateMap[id]);
+        geoids = ids.map(id => mbm.map(id));
       }
       else
       {
@@ -377,7 +391,7 @@ export function blockmapToVTDmap(revMap: RevBlockMapping, blockMap: BlockMapping
     if (Util.countKeys(districtToBlocks) == 1)
     {
       let blocks = Object.keys(districtToBlocks[Util.nthKey(districtToBlocks)]);
-      if (blocks[0] === geoid || (revMap[geoid] && blocks.length === revMap[geoid].length))
+      if (blocks[0] === geoid || (mbm.rev(geoid) && blocks.length === mbm.rev(geoid).length))
         bWhole = true;
     }
     if (bWhole)

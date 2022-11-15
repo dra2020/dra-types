@@ -5,7 +5,7 @@ import * as DT from './vfeature';
 // Given the topology for a precinct and a split, compute the feature data for the virtual feature.
 //
 
-export function splitToGeoFeature(split: DT.SplitBlock, topoPrecinct: Poly.Topo, blockmapping: any): G.GeoFeature
+export function splitToGeoFeature(split: DT.SplitBlock, topoPrecinct: Poly.Topo, blockmapping: G.MultiBlockMapping): G.GeoFeature
 {
   let contiguity = new Util.IndexedArray();
   let block_contiguity = new Util.IndexedArray();
@@ -18,7 +18,7 @@ export function splitToGeoFeature(split: DT.SplitBlock, topoPrecinct: Poly.Topo,
       if (b.properties.contiguity)
       {
         b.properties.contiguity.forEach((id: string) => {
-            contiguity.set(id === 'OUT_OF_STATE' ? id : blockmapping[id]);
+            contiguity.set(id === 'OUT_OF_STATE' ? id : blockmapping.map(id));
           });
         b.properties.contiguity.forEach((id: string) => {
             block_contiguity.set(id);
