@@ -7,9 +7,11 @@ import * as DT from './vfeature';
 
 export function splitToGeoFeature(split: DT.SplitBlock, topoPrecinct: Poly.Topo, blockmapping: G.MultiBlockMapping): G.GeoFeature
 {
+  let f = Poly.topoMerge(topoPrecinct, split.blocks);
+  if (!f) return f;
+
   let contiguity = new Util.IndexedArray();
   let block_contiguity = new Util.IndexedArray();
-  let f = Poly.topoMerge(topoPrecinct, split.blocks);
   f.properties.datasets = {};
   split.blocks.forEach(blockid => {
       let b = topoPrecinct.objects[blockid];

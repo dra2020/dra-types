@@ -330,7 +330,8 @@ export function blockmapToVTDmap(blockMap: BlockMapping, mbm: G.MultiBlockMappin
     res.nBlocks++;
 
     // Simple test for block id (vs. voting district or block group) id
-    if (n >= 15)
+    // Also skip longer custom precinct ids
+    if (n >= 15 && (!mbm || !mbm.rev(id)))
     {
       ids = [id];
       if (mbm && mbm.map(id) !== undefined)
