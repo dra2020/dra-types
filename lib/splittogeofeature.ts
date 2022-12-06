@@ -5,7 +5,7 @@ import * as DT from './vfeature';
 // Given the topology for a precinct and a split, compute the feature data for the virtual feature.
 //
 
-export function splitToGeoFeature(split: DT.SplitBlock, topoPrecinct: Poly.Topo, blockmapping: G.MultiBlockMapping): G.GeoFeature
+export function splitToGeoFeature(split: DT.SplitBlock, topoPrecinct: Poly.Topo, mbm: G.MultiBlockMapping): G.GeoFeature
 {
   let f = Poly.topoMerge(topoPrecinct, split.blocks);
   if (!f) return f;
@@ -20,7 +20,10 @@ export function splitToGeoFeature(split: DT.SplitBlock, topoPrecinct: Poly.Topo,
       if (b.properties.contiguity)
       {
         b.properties.contiguity.forEach((id: string) => {
-            contiguity.set(id === 'OUT_OF_STATE' ? id : blockmapping.map(id));
+            if (id === 'OUT_OF_STATE')
+              contiguity.set(id);
+            else
+              mbm.multimap(id).forEach(geoid => contiguity.set(geoid));
           });
         b.properties.contiguity.forEach((id: string) => {
             block_contiguity.set(id);
@@ -32,5 +35,28 @@ export function splitToGeoFeature(split: DT.SplitBlock, topoPrecinct: Poly.Topo,
   f.properties.contiguity = contiguity.asArray();
   f.properties.block_contiguity = block_contiguity.asArray();
   f.properties.blocks = split.blocks;
+  f.properties.mbmstamp = mbm.stamp;
   return f;
+}
+
+export function splitUpdateContiguity(f: G.GeoFeature, topoPrecinct: Poly.Topo, mbm: G.MultiBlockMapping): void
+{
+  if (topoPrecinct && f.properties.blocks && f.properties.mbmstamp !== mbm.stamp)
+  {
+    let contiguity = new Util.IndexedArray();
+    f.properties.blocks.forEach((blockid: string) => {
+        let b = topoPrecinct.objects[blockid];
+        if (b.properties.contiguity)
+        {
+          b.properties.contiguity.forEach((id: string) => {
+              if (id === 'OUT_OF_STATE')
+                contiguity.set(id);
+              else
+                mbm.multimap(id).forEach(geoid => contiguity.set(geoid));
+            });
+        }
+      });
+    f.properties.contiguity = contiguity.asArray();
+    f.properties.mbm = mbm;
+  }
 }
