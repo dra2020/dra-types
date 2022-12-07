@@ -30,6 +30,7 @@ export function splitToGeoFeature(split: DT.SplitBlock, topoPrecinct: Poly.Topo,
           });
       }
     });
+  split.blocks.forEach(blockid => block_contiguity.clear(blockid));
   f.properties.id = DT.splitToVgeoid(split);
   f.properties.name = `Part of ${split.geoid} from ${split.blocks.length} blocks`;
   f.properties.contiguity = contiguity.asArray();
@@ -37,26 +38,4 @@ export function splitToGeoFeature(split: DT.SplitBlock, topoPrecinct: Poly.Topo,
   f.properties.blocks = split.blocks;
   f.properties.mbmstamp = mbm.stamp;
   return f;
-}
-
-export function splitUpdateContiguity(f: G.GeoFeature, topoPrecinct: Poly.Topo, mbm: G.MultiBlockMapping): void
-{
-  if (topoPrecinct && mbm && f.properties.contiguity && f.properties.blocks && f.properties.mbmstamp !== mbm.stamp)
-  {
-    let contiguity = new Util.IndexedArray();
-    f.properties.blocks.forEach((blockid: string) => {
-        let b = topoPrecinct.objects[blockid];
-        if (b.properties.contiguity)
-        {
-          b.properties.contiguity.forEach((id: string) => {
-              if (id === 'OUT_OF_STATE')
-                contiguity.set(id);
-              else
-                mbm.multimap(id).forEach(geoid => contiguity.set(geoid));
-            });
-        }
-      });
-    f.properties.contiguity = contiguity.asArray();
-    f.properties.mbmstamp = mbm.stamp;
-  }
 }
