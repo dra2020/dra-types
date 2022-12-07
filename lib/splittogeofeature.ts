@@ -41,7 +41,7 @@ export function splitToGeoFeature(split: DT.SplitBlock, topoPrecinct: Poly.Topo,
 
 export function splitUpdateContiguity(f: G.GeoFeature, topoPrecinct: Poly.Topo, mbm: G.MultiBlockMapping): void
 {
-  if (topoPrecinct && f.properties.blocks && f.properties.mbmstamp !== mbm.stamp)
+  if (topoPrecinct && mbm && f.properties.contiguity && f.properties.blocks && f.properties.mbmstamp !== mbm.stamp)
   {
     let contiguity = new Util.IndexedArray();
     f.properties.blocks.forEach((blockid: string) => {
@@ -57,6 +57,6 @@ export function splitUpdateContiguity(f: G.GeoFeature, topoPrecinct: Poly.Topo, 
         }
       });
     f.properties.contiguity = contiguity.asArray();
-    f.properties.mbm = mbm;
+    f.properties.mbmstamp = mbm.stamp;
   }
 }
