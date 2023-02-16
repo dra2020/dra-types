@@ -1,6 +1,7 @@
 import * as geojson from 'geojson';
 import { Util, Poly, G } from '@dra2020/baseclient';
 import * as DT from './vfeature';
+import * as PF from './packedfields';
 
 // Given the topology for a precinct and a split, compute the feature data for the virtual feature.
 //
@@ -12,11 +13,24 @@ export function splitToGeoFeature(split: DT.SplitBlock, topoPrecinct: Poly.Topo,
 
   let contiguity = new Util.IndexedArray();
   let block_contiguity = new Util.IndexedArray();
-  f.properties.datasets = {};
   split.blocks.forEach(blockid => {
       let b = topoPrecinct.objects[blockid];
       if (b.properties.datasets)
+      {
+        if (! f.properties.datasets)
+          f.properties.datasets = {};
         Util.deepAccum(f.properties.datasets, b.properties.datasets);
+      }
+      if (b.properties.packedFields)
+      {
+        if (! f.properties.packedFields)
+        {
+          f.properties.packedFields = PF.packedCopy(b.properties.packedFields);
+          f.properties.getDatasetField = b.properties.getDatasetField;
+        }
+        else
+          PF.aggregatePackedFields(f.properties.packedFields, b.properties.packedFields);
+      }
       if (b.properties.contiguity)
       {
         b.properties.contiguity.forEach((id: string) => {
