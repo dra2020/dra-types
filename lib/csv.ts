@@ -220,6 +220,7 @@ export interface ConvertResult
 {
   inBlockMap: BlockMapping;
   inMbm: G.MultiBlockMapping;
+  outMbm: G.MultiBlockMapping;
   outValid: boolean;
   outState: string;
   outMap: BlockMapping;
@@ -239,6 +240,11 @@ export function blockmapToState(blockMap: BlockMapping): string
   return null;
 }
 
+export function blockmapToVTDmap(blockMap: BlockMapping, mbm: G.MultiBlockMapping, altBlocks: AltBlockMapping): ConvertResult
+{
+  return blockmapToVTDmapCustom(blockMap, mbm, mbm, altBlocks);
+}
+
 // blockToVTD:
 //  Take BlockMapping (simple map of GEOID to districtID) and a per-state map of block-level GEOID to VTD
 //  and return the output mapping of VTD to districtID, as well a data structure that describes any VTD's
@@ -249,11 +255,16 @@ export function blockmapToState(blockMap: BlockMapping): string
 //  not all specify the same state, the mapping is considered invalid and the outValid flag is set to false.
 //
 
-export function blockmapToVTDmap(blockMap: BlockMapping, mbm: G.MultiBlockMapping, altBlocks: AltBlockMapping): ConvertResult
+export function blockmapToVTDmapCustom(
+  blockMap: BlockMapping,
+  inMbm: G.MultiBlockMapping,
+  outMbm: G.MultiBlockMapping,
+  altBlocks: AltBlockMapping): ConvertResult
 {
   let res: ConvertResult = {
       inBlockMap: blockMap,
-      inMbm: mbm,
+      inMbm: inMbm,
+      outMbm: outMbm,
       outValid: true,
       outState: null,
       outMap: {},
@@ -269,6 +280,8 @@ export function blockmapToVTDmap(blockMap: BlockMapping, mbm: G.MultiBlockMappin
   let bmGather: { [geoid: string]: { [district: string]: { [blockid: string]: boolean } } } = {};
 
   let revBG: RevBlockMapping; // lazy create on demand
+
+  function isBlockID(b: string): boolean { return b.length >= 15 && (!inMbm || !!inMbm.map(b)) }
 
   if (altBlocks)
   {
@@ -287,7 +300,7 @@ export function blockmapToVTDmap(blockMap: BlockMapping, mbm: G.MultiBlockMappin
     for (var id in blockMap) if (blockMap.hasOwnProperty(id))
     {
       let n: number = id.length;
-      if (n >= 15 && !(mbm && mbm.map(id) !== undefined) && revAltBlocks[id])
+      if (isBlockID(id) && revAltBlocks[id])
       {
         if (!bestAlt[revAltBlocks[id].blockid] || bestAlt[revAltBlocks[id].blockid].pop < revAltBlocks[id].pop)
         {
@@ -331,15 +344,15 @@ export function blockmapToVTDmap(blockMap: BlockMapping, mbm: G.MultiBlockMappin
 
     // Simple test for block id (vs. voting district or block group) id
     // Also skip longer custom precinct ids
-    if (n >= 15 && (!mbm || !mbm.rev(id)))
+    if (isBlockID(id))
     {
       ids = [id];
-      if (mbm && mbm.map(id) !== undefined)
-        geoids = [mbm.map(id)];
+      if (outMbm && outMbm.map(id) !== undefined)
+        geoids = [outMbm.map(id)];
       else
       {
         geoids = [id.substr(0, 12)];
-        if (mbm && !mbm.rev(geoids[0]))
+        if (outMbm && !outMbm.rev(geoids[0]))
         {
           res.outValid = false;
           break;
@@ -348,17 +361,23 @@ export function blockmapToVTDmap(blockMap: BlockMapping, mbm: G.MultiBlockMappin
     }
     else if (n == 12)
     {
-      if (!revBG) revBG = reverseBlockgroupMapping(mbm);
+      if (!revBG) revBG = reverseBlockgroupMapping(outMbm);
       if (revBG[id])
       {
         ids = revBG[id];
-        geoids = ids.map(id => mbm.map(id));
+        geoids = ids.map(id => outMbm.map(id));
       }
       else
       {
         ids = [id];
         geoids = [id];
       }
+    }
+    else if (inMbm.rev(id))
+    {
+      // Map down to blockids and then back up to geoids to handle both custom and default geoids
+      ids = inMbm.rev(id);
+      geoids = ids.map(blockid => outMbm.map(blockid));
     }
     else
     {
@@ -392,7 +411,7 @@ export function blockmapToVTDmap(blockMap: BlockMapping, mbm: G.MultiBlockMappin
     if (Util.countKeys(districtToBlocks) == 1)
     {
       let blocks = Object.keys(districtToBlocks[Util.nthKey(districtToBlocks)]);
-      if (blocks[0] === geoid || (mbm.rev(geoid) && blocks.length === mbm.rev(geoid).length))
+      if (blocks[0] === geoid || (outMbm.rev(geoid) && blocks.length === outMbm.rev(geoid).length))
         bWhole = true;
     }
     if (bWhole)
