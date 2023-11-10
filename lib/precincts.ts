@@ -12,6 +12,9 @@ export interface Precincts
   deleted?: boolean,
   published?: string,
   official?: boolean,
+  supersets?: string[],
+  subsets?: string[],
+  conflicts?: string[],
 }
 
 export type PrecinctsIndex = { [id: string]: Precincts };
