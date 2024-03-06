@@ -7,6 +7,8 @@ export const BucketMap: any =
     'state-dev': 'dev-dra-us-west-2-723398989493',
     'logs': 'dra-uswest-logs',
     'logs-dev': 'dra-uswest-logs',
+    'logs-archive': 'dra-uswest-logs-archive',
+    'logs-archive-dev': 'dra-uswest-logs-archive',
     'memsqs': 'dra-uswest-memsqs',
     'memsqs-dev': 'dra-uswest-memsqs',
     'images': 'dra-uswest-images',
