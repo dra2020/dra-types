@@ -1,6 +1,6 @@
 {
   "name": "@dra2020/dra-types",
-  "version": "1.8.86",
+  "version": "1.8.89",
   "description": "Shared types used between client, server and tools.",
   "main": "dist/dra-types.js",
   "types": "./dist/all.d.ts",
@@ -24,18 +24,18 @@
   "homepage": "https://github.com/dra2020/dra-types#readme",
   "devDependencies": {
     "@types/geojson": "^7946.0.10",
-    "@types/node": "^18.11.11",
-    "@types/object-hash": "^2.2.1",
-    "source-map-loader": "^4.0.1",
-    "ts-loader": "^9.4.2",
+    "@types/node": "^20.11.30",
+    "@types/object-hash": "^3.0.6",
+    "source-map-loader": "^5.0.0",
+    "ts-loader": "^9.5.1",
     "tsify": "^5.0.4",
-    "typescript": "^4.9.3",
-    "webpack": "^5.75.0",
-    "webpack-cli": "^5.0.1"
+    "typescript": "^5.4.3",
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "@dra2020/baseclient": "^1.0.93",
+    "@dra2020/baseclient": "^1.0.127",
     "geojson": "^0.5.0",
-    "object-hash": "^2.2.0"
+    "object-hash": "^3.0.0"
   }
 }
