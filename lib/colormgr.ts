@@ -499,3 +499,65 @@ export function allGroups16Colors(palette: PaletteName, colors: string[])
   }*/
   return modColors;
 }
+
+export interface DistrictCache
+{
+  colorElection?: string;
+  colorEthnic?: string;
+  colorSolid?: string;
+}
+
+// Color property we need out of the full DistrictProps
+export interface ColorProp
+{
+  color: string,
+}
+export type ColorProps = Array<ColorProp>;
+
+export interface DistrictColorParams
+{
+  datasetContext: PF.DatasetContext,
+  mapColors: ColorProps,
+  aggregates: PF.PackedFields[],
+  paletteDefaults: PaletteDefaults,
+  useFirstColor: boolean,
+  usePalette: string,
+  colorDistrictsBy: string,
+}
+
+export function computeDistrictColors(params: DistrictColorParams): DistrictCache[]
+{
+  let dcNew: DistrictCache[] = [];
+  for (let i: number = 0; i < params.aggregates.length; i++)
+  {
+    let agg = params.aggregates[i];
+    let mapColor = i < params.mapColors.length ? params.mapColors[i].color : Colors.genColor(i, params.useFirstColor, params.usePalette);
+    let dc: DistrictCache = {};
+
+    // Compute election color and partisan color
+    dc.colorEthnic = mapColor;
+    dc.colorElection = ToPartisanDistrictColor(agg, params.datasetContext, params.paletteDefaults);
+
+    switch (params.colorDistrictsBy)
+    {
+      case 'election':
+        dc.colorSolid = dc.colorElection;
+        break;
+      case 'nonwhite':
+      case 'hisp':
+      case 'black':
+      case 'native':
+      case 'asian':
+      case 'pac':
+      case 'all':
+        dc.colorEthnic = ToEthnicColorStr(agg, params.datasetContext, params.paletteDefaults, params.colorDistrictsBy);
+        dc.colorSolid = dc.colorEthnic;
+        break;
+      default:
+        dc.colorSolid = mapColor;
+        break;
+    }
+    dcNew.push(dc);
+  }
+  return dcNew;
+}

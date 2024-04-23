@@ -42,6 +42,7 @@ export interface UserLikes
 // congress, upper, lower and other => the plan is for entire state
 // county and city => plan is for a single county or city within a state
 export type PlanType = 'congress' | 'upper' | 'lower' | 'county' | 'city' | 'coi' | 'other';
+export type PlanTypeOrEmpty = PlanType | '';
 
 // Once we attempt to contact, they've optedin or optedout (both mean email is valid and not blocked, even if not "validated")
 // implicitoptedin means we contacted them successfully and they didn't optout, but also did not explicitly optin

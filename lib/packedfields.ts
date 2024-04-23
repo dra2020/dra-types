@@ -96,6 +96,14 @@ export interface DatasetMeta
 }
 export type DatasetsMeta = { [dataset: string]: DatasetMeta };
 
+export interface PrimaryDatasetKeys
+{
+  SHAPES?: string,
+  CENSUS: string,
+  VAP: string,
+  ELECTION: string,
+}
+
 // This integregates the information associated with a specific state and datasource as
 // well as user selections around which datasets to view. Used to propagate through UI.
 export interface DatasetContext
