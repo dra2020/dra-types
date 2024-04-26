@@ -220,6 +220,30 @@ export let Schemas: any = {
           { id: 'HASH' }
         ],  // sparse
     },
+  'dataset':
+    {
+      FileOptions: { map: true },
+      Schema: {
+        id: 'S',
+        name: 'S',
+        description: 'S',
+        createdBy: 'S',
+        createTime: 'S',
+        modifyTime: 'S',
+        deleted: 'BOOL',
+        published: 'S',
+        official: 'BOOL',
+        state: 'S',
+        datasource: 'S',
+        // meta: { dataset metadata structure },
+        // dotmap: 'BOOL',
+      },
+      KeySchema: { createdBy: 'HASH', id: 'RANGE' },
+      GlobalSecondaryIndexes: [
+          { published: 'HASH' },
+          { id: 'HASH' }
+        ],  // sparse
+    },
   'groups':
     {
       FileOptions: { map: true },
