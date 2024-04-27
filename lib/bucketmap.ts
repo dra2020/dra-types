@@ -13,6 +13,8 @@ export const BucketMap: any =
     'memsqs-dev': 'dra-uswest-memsqs',
     'images': 'dra-uswest-images',
     'images-dev': 'dra-uswest-images',
+    'datasets': 'dra-uswest-datasets',
+    'datasets-dev': 'dra-uswest-datasets',
     'layers': 'dra-uswest-layers',
     'layers-dev': 'dra-uswest-layers',
     'data': 'dra-us-west-datafiles',
