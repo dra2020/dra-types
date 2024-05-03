@@ -3,6 +3,12 @@ export interface DatasetField
 {
   shortCaption: string,  // Typically 2-4 letters
   longCaption: string,   // Can be longer descriptive phrase, especially for combinations
+  order?: number,        // For ordering fields in UI
+  isCombo?: boolean,     // Built-in, for census combos
+}
+export function sortFields(f1: DatasetField, f2: DatasetField): number
+{
+  return (f1.order || 0) - (f2.order || 0);
 }
 
 // For Partisan fields, expect keys of 'D', 'R' and 'Tot'
@@ -37,7 +43,7 @@ export interface Dataset
   createTime?: string,
   modifyTime?: string,
   deleted?: boolean,
-  published?: boolean,
+  published?: string,
   official?: boolean,
   state?: string,
   datasource?: string,

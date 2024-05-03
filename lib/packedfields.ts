@@ -29,6 +29,8 @@ import { PlanType } from './dra-types';
 //  Mix: Two or more races, not Hispanic
 //  AsnPI: Asian + Pacific, not Hispanic
 
+import { DatasetMeta, DatasetsMeta } from './datasets';
+
 
 export const AGG_DEMOGRAPHIC = 'demographic';
 export const AGG_DEMOGRAPHIC18 = 'demographic18';
@@ -39,6 +41,7 @@ export const AGG_pvi = 'pvi';
 export const DATASET_TYPE_DEMOGRAPHIC = 'demographic';
 export const DATASET_TYPE_ELECTION = 'election';
 export const DATASET_TYPE_PVI = 'pvi';
+export const DATASET_TYPE_OTHER = 'other';
 
 export const DS_PVI2020 = 'P20GPR';
 export const PVI2020_Title = 'PVI 2016/2020';
@@ -63,9 +66,8 @@ export interface StatesMeta
   [key: string]: StatesMetaIndex;    // key is one of the datasource strings
 }
 
-export type FieldGetter = (f: string) => number;
-export function fieldGetterNotLoaded(f: string): number { return undefined }
-export type PackedFields = Float64Array;
+export type PackedFieldsArray = Float64Array;
+export type PackedFields = { [datasetid: string]: PackedFieldsArray };
 export interface PackedFieldsIndex
 {
   [field: string]: number; // offset into PackedFields
@@ -78,23 +80,7 @@ export interface PackedMetaIndex
   getDatasetField: (f: any, dataset: string, field: string) => number;
 }
 
-export interface DatasetMeta
-{
-  type: string,
-  year: number,
-  title: string,
-  fields: {
-    [key: string]: any,
-  },
-  votingAge?: boolean,
-  office?: string,
-  subtype?: string,
-  description?: string,
-  nhAlone?: boolean,
-  privateKey?: string,    // key for private data
-  members?: {[key: number]: string},
-}
-export type DatasetsMeta = { [dataset: string]: DatasetMeta };
+export type GroupPackedMetaIndex = { [datasetid: string]: PackedMetaIndex };
 
 export interface PrimaryDatasetKeys
 {
@@ -108,7 +94,7 @@ export interface PrimaryDatasetKeys
 // well as user selections around which datasets to view. Used to propagate through UI.
 export interface DatasetContext
 {
-  dsIndex: PackedMetaIndex;
+  dsIndex: GroupPackedMetaIndex;
   primeDDS: string;     // Demographic (Census)
   primeVDS: string;     // VAP/CVAP
   primeEDS: string;     // Election
@@ -189,7 +175,7 @@ function fGetW(f: any, datasetKey: string, p: string): any
   return undefined;
 }
 
-export function computeMetaIndex(meta: DatasetsMeta): PackedMetaIndex
+export function computeMetaIndex(datasetid: string, meta: DatasetsMeta): PackedMetaIndex
 {
   if (meta == null) return null;
   let offset = 1; // first entry is count of aggregates
@@ -202,21 +188,22 @@ export function computeMetaIndex(meta: DatasetsMeta): PackedMetaIndex
         });
       index.fields[datasetKey] = fieldsIndex;
     });
+  let groupindex = { [datasetid]: index };
   index.length = offset;
   index.getDatasetField = (f: any, dataset: string, field: string): number => {
       let pf = retrievePackedFields(f);
-      return getPackedField(index, pf, dataset, field);
+      return getPackedField(groupindex, pf, datasetid, dataset, field);
     };
   return index;
 }
 
 let nAlloc = 0;
-function allocPackedFields(length: number): PackedFields
+function allocPackedFieldsArray(length: number): PackedFieldsArray
 {
   let ab = new ArrayBuffer(8 * length);
   let af = new Float64Array(ab);
   nAlloc++;
-  //if ((nAlloc % 10000) == 0) console.log(`allocPackedFields: ${nAlloc} allocs`);
+  //if ((nAlloc % 10000) == 0) console.log(`allocPackedFieldsArray: ${nAlloc} allocs`);
   return af;
 }
 
@@ -224,7 +211,7 @@ export function computePackedFields(f: any, index: PackedMetaIndex): PackedField
 {
   if (f.properties.packedFields) return f.properties.packedFields as PackedFields;
 
-  let af = allocPackedFields(index.length);
+  let af = allocPackedFieldsArray(index.length);
   af[0] = 0;  // count of number of aggregates
   Object.keys(index.fields).forEach((dataset: string) => {
       let fields = index.fields[dataset];
@@ -235,12 +222,12 @@ export function computePackedFields(f: any, index: PackedMetaIndex): PackedField
           af[fields[field]] = n;
         });
     });
-  f.properties.packedFields = af;  // cache here
+  f.properties.packedFields = { ['']: af };  // cache here
   f.properties.getDatasetField = index.getDatasetField;
 
   // Major memory savings to delete this after packing
   delete f.properties.datasets;
-  return af;
+  return f.properties.packedFields;
 }
 
 export function hasPackedFields(f: any): boolean
@@ -255,6 +242,60 @@ export function setPackedFields(f: any, pf: PackedFields, fIndex: any): void
   f.properties.getDatasetField = fIndex.properties.getDatasetField
 }
 
+const reExtDataset = /^.*\.ds$/;
+export function isExtDataset(did: string): boolean
+{
+  return did && reExtDataset.test(did);
+}
+
+export type ExtPackedFields = Uint32Array; // [nblocks][nfields][fields]...
+export type ExtBlockCardinality = Map<string, number>;
+
+export function featurePushExtPackedFields(f: any, datasetid: string, data: ExtPackedFields, card: ExtBlockCardinality): void
+{
+  let blocks = f?.properties?.blocks || (card.has(f.properties.id) ? [ f.properties.id ] : null);
+  if (!blocks)
+    return;
+  if (!f.properties.packedFields)
+    throw('pushExtPackedFields: base datasets should be pushed first');
+  if (card.size != data[0])
+    throw('pushExtPackedFields: packed fields and block cardinality do not match');
+  if (f.properties.packedFields[datasetid])
+    return; // already pushed
+  let nfields = data[1];
+  let pfa = allocPackedFieldsArray(nfields+1);  // field count
+  pfa[0] = 0;
+  for (let j = 0; j < nfields; j++) pfa[j] = 0;
+    blocks.forEach((blockid: string) => {
+        if (! card.has(blockid))
+          throw(`pushExtPackedFields: missing blockid ${blockid} in cardinality set`);
+        let x = 2 + (nfields * card.get(blockid));
+        for (let i = 1; i <= nfields; i++)
+          pfa[i] += data[x++];
+      });
+  f.properties.packedFields[datasetid] = pfa;
+}
+
+export function featurePushedExtPackedFields(f: any, datasetid: string, card: ExtBlockCardinality): boolean
+{
+  if (! f) return true;
+  if (f.features) return featurePushedExtPackedFields(f.features[0], datasetid, card);
+  if (!f?.properties?.blocks && !card.has(f.properties.id))
+    return true;
+  if (!f.properties.packedFields)
+    return true;
+  return !!f.properties.packedFields[datasetid];
+}
+
+export function pushedExtPackedFields(pf: PackedFields, datasetids: string[]): boolean
+{
+  if (pf && datasetids)
+    for (let i = 0; i < datasetids.length; i++)
+      if (! pf[datasetids[i]])
+        return false;
+  return !!pf;
+}
+
 export function retrievePackedFields(f: any): PackedFields
 {
   if (f.properties.packedFields === undefined) throw 'Feature should have pre-computed packed fields';
@@ -266,46 +307,85 @@ export function retrievePackedFields(f: any): PackedFields
 let abZero = new ArrayBuffer(8);
 let afZero = new Float64Array(abZero);
 afZero[0] = 0;
+let pfZero = { ['']: afZero };
 
-export function zeroPackedFields(index: PackedMetaIndex): PackedFields
+export function zeroPackedFields(index: GroupPackedMetaIndex): PackedFields
 {
-  if (index == null) return afZero;
-  let af = allocPackedFields(index.length);
-  for (let i = 0; i < af.length; i++)
-    af[i] = 0;
-  return af;
+  if (index == null) return pfZero;
+  let pf: PackedFields = {};
+  Object.keys(index).forEach(datasetid => {
+      let af = allocPackedFieldsArray(index[datasetid].length);
+      for (let i = 0; i < af.length; i++)
+        af[i] = 0;
+      pf[datasetid] = af;
+    });
+  return pf;
 }
 
 export function zeroPackedCopy(pf: PackedFields): PackedFields
 {
-  if (pf == null) return afZero;
-  let af = allocPackedFields(pf.length);
-  for (let i = 0; i < af.length; i++)
-    af[i] = 0;
-  return af;
+  if (pf == null) return pfZero;
+  let copy: PackedFields = {};
+  Object.keys(pf).forEach(datasetid => {
+      let cf = allocPackedFieldsArray(pf[datasetid].length);
+      for (let i = 0; i < cf.length; i++)
+        cf[i] = 0;
+      copy[datasetid] = cf;
+    });
+  return copy;
 }
 
 export function packedCopy(pf: PackedFields): PackedFields
 {
   if (pf == null) return null;
-  let af = allocPackedFields(pf.length);
-  for (let i = 0; i < pf.length; i++)
-    af[i] = pf[i];
-  return af;
+  let copy: PackedFields = {};
+  Object.keys(pf).forEach(datasetid => {
+      let af = pf[datasetid];
+      let cf = allocPackedFieldsArray(af.length);
+      for (let i = 0; i < af.length; i++)
+        cf[i] = af[i];
+      copy[datasetid] = cf;
+    });
+  return copy;
 }
 
 export function aggregatePackedFields(agg: PackedFields, pf: PackedFields): PackedFields
 {
   if (agg == null || pf == null) return agg;
-  if (agg.length != pf.length)
-  {
-    return agg; // bug, but don't crash
-    //throw 'aggregatePackedFields: unexpected length mismatch';
-  }
-  let n = agg.length;
-  for (let i = 1; i < n; i++)
-    agg[i] += pf[i];
-  agg[0]++; // count of number of aggregates
+  Object.keys(agg).forEach(datasetid => {
+      let af = agg[datasetid];
+      let sf = pf[datasetid];
+      if (sf && sf.length == af.length)
+      {
+        let n = af.length;
+        for (let i = 1; i < n; i++)
+          af[i] += sf[i];
+        af[0]++;  // count of aggregates
+      }
+    });
+  return agg;
+}
+
+export function aggregateCount(agg: PackedFields): number
+{
+  if (!agg || !agg['']) return 0;
+  return agg[''][0];
+}
+
+export function decrementPackedFields(agg: PackedFields, pf: PackedFields): PackedFields
+{
+  if (agg == null || pf == null) return agg;
+  Object.keys(agg).forEach(datasetid => {
+      let af = agg[datasetid];
+      let sf = pf[datasetid];
+      if (sf && sf.length == af.length)
+      {
+        let n = af.length;
+        for (let i = 1; i < n; i++)
+          af[i] -= sf[i];
+        af[0]++;  // count of aggregates
+      }
+    });
   return agg;
 }
 
@@ -314,29 +394,30 @@ export function diffPackedFields(main: any, parts: any[]): PackedFields
   main = packedCopy(retrievePackedFields(main));
   if (main == null || parts == null || parts.length == 0) return null;
   parts = parts.map(retrievePackedFields);
-  parts.forEach((pf: PackedFields) => {
-      for (let i = 0; i < main.length; i++)
-        main[i] -= pf[i];
-    });
+  parts.forEach((pf: PackedFields) => decrementPackedFields(main, pf));
   return main;
 }
 
-export function getPackedField(index: PackedMetaIndex, pf: PackedFields, dataset: string, field: string): number
+export function getPackedField(index: GroupPackedMetaIndex, pf: PackedFields, datasetid: string, dataset: string, field: string): number
 {
-  if (index == null || pf == null) return 0;
-  let fields = index.fields[dataset];
-  return fields ? (fields[field] !== undefined ? pf[fields[field]] : 0) : 0;
+  if (!index || !pf || !index[datasetid] || !pf[datasetid]) return 0;
+  let fields = index[datasetid].fields[dataset];
+  return fields ? (fields[field] !== undefined ? pf[datasetid][fields[field]] : 0) : 0;
 }
 
-export function findPackedField(index: PackedMetaIndex, pf: PackedFields, dataset: string, field: string): number
+export function findPackedField(index: GroupPackedMetaIndex, pf: PackedFields, datasetid: string, dataset: string, field: string): number
 {
-  let fields = index.fields[dataset];
+  let fields = index[datasetid].fields[dataset];
   return fields ? (fields[field] !== undefined ? fields[field] : -1) : -1;
 }
 
-export function ToGetter(agg: PackedFields, dc: DatasetContext, datasetKey: string): FieldGetter
+// Utility type to simplify code that pulls from same dataset to compute some composite
+export type FieldGetter = (f: string) => number;
+export function fieldGetterNotLoaded(f: string): number { return undefined }
+
+export function ToGetter(agg: PackedFields, dc: DatasetContext, datasetid: string, datasetKey: string): FieldGetter
 {
-  return (field: string) => { return getPackedField(dc.dsIndex, agg, datasetKey, field) };
+  return (field: string) => { return getPackedField(dc.dsIndex, agg, datasetid, datasetKey, field) };
 }
 
 export function ToGetterPvi16(agg: PackedFields, dc: DatasetContext, datasetKey: string): FieldGetter
@@ -344,13 +425,13 @@ export function ToGetterPvi16(agg: PackedFields, dc: DatasetContext, datasetKey:
   return (field: string) =>
   {
     if (field === 'R')
-      return Math.round((getPackedField(dc.dsIndex, agg, datasetKey, 'R12') + getPackedField(dc.dsIndex, agg, datasetKey, 'R16')) / 2);
+      return Math.round((getPackedField(dc.dsIndex, agg, '', datasetKey, 'R12') + getPackedField(dc.dsIndex, agg, '', datasetKey, 'R16')) / 2);
     if (field === 'D')
-      return Math.round((getPackedField(dc.dsIndex, agg, datasetKey, 'D12') + getPackedField(dc.dsIndex, agg, datasetKey, 'D16')) / 2);
+      return Math.round((getPackedField(dc.dsIndex, agg, '', datasetKey, 'D12') + getPackedField(dc.dsIndex, agg, '', datasetKey, 'D16')) / 2);
     if (field === 'Tot')
       return Math.round((
-        getPackedField(dc.dsIndex, agg, datasetKey, 'R12') + getPackedField(dc.dsIndex, agg, datasetKey, 'R16') +
-        getPackedField(dc.dsIndex, agg, datasetKey, 'D12') + getPackedField(dc.dsIndex, agg, datasetKey, 'D16')) / 2);
+        getPackedField(dc.dsIndex, agg, '', datasetKey, 'R12') + getPackedField(dc.dsIndex, agg, '', datasetKey, 'R16') +
+        getPackedField(dc.dsIndex, agg, '', datasetKey, 'D12') + getPackedField(dc.dsIndex, agg, '', datasetKey, 'D16')) / 2);
     return 0;
   };
 }
@@ -360,13 +441,13 @@ export function ToGetterPvi20(agg: PackedFields, dc: DatasetContext): FieldGette
   return (field: string) =>
   {
     if (field === 'R')
-      return Math.round((getPackedField(dc.dsIndex, agg, DS_PRES2016, 'R') + getPackedField(dc.dsIndex, agg, DS_PRES2020, 'R')) / 2);
+      return Math.round((getPackedField(dc.dsIndex, agg, '', DS_PRES2016, 'R') + getPackedField(dc.dsIndex, agg, '', DS_PRES2020, 'R')) / 2);
     if (field === 'D')
-      return Math.round((getPackedField(dc.dsIndex, agg, DS_PRES2016, 'D') + getPackedField(dc.dsIndex, agg, DS_PRES2020, 'D')) / 2);
+      return Math.round((getPackedField(dc.dsIndex, agg, '', DS_PRES2016, 'D') + getPackedField(dc.dsIndex, agg, '', DS_PRES2020, 'D')) / 2);
     if (field === 'Tot')
       return Math.round((
-        getPackedField(dc.dsIndex, agg, DS_PRES2016, 'R') + getPackedField(dc.dsIndex, agg, DS_PRES2020, 'R') +
-        getPackedField(dc.dsIndex, agg, DS_PRES2016, 'D') + getPackedField(dc.dsIndex, agg, DS_PRES2020, 'D')) / 2);
+        getPackedField(dc.dsIndex, agg, '', DS_PRES2016, 'R') + getPackedField(dc.dsIndex, agg, '', DS_PRES2020, 'R') +
+        getPackedField(dc.dsIndex, agg, '', DS_PRES2016, 'D') + getPackedField(dc.dsIndex, agg, '', DS_PRES2020, 'D')) / 2);
     return 0;
   };
 
@@ -378,12 +459,12 @@ export function calcShift(agg: PackedFields, dc: DatasetContext, datasetOld: str
     ToGetterPvi16(agg, dc, datasetOld) :
     datasetOld === DS_PVI2020 ?
       ToGetterPvi20(agg, dc) :
-      ToGetter(agg, dc, datasetOld);
+      ToGetter(agg, dc, '', datasetOld);
   const getterNew = datasetNew === DS_PVI2016 ?
     ToGetterPvi16(agg, dc, datasetNew) :
     datasetNew === DS_PVI2020 ?
       ToGetterPvi20(agg, dc) :
-      ToGetter(agg, dc, datasetNew);
+      ToGetter(agg, dc, '', datasetNew);
 
   // Calc two-party Swing
   const repOld = getterOld('R');
