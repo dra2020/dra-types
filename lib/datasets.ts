@@ -5,6 +5,9 @@ export interface DatasetField
   longCaption: string,   // Can be longer descriptive phrase, especially for combinations
   order?: number,        // For ordering fields in UI
   isCombo?: boolean,     // Built-in, for census combos
+  colorBy?: boolean,     // For extended datasets
+  invert?: boolean,      // For extended datasets, colorby inverted
+  sumOf?: string[],      // Only for import processing
 }
 export function sortFields(f1: DatasetField, f2: DatasetField): number
 {
