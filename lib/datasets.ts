@@ -51,6 +51,7 @@ export interface Dataset
   state?: string,
   datasource?: string,
   dotmap?: boolean,
+  blobid?: string,
   meta?: DatasetsMeta,
 }
 
