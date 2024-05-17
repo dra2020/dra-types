@@ -26,6 +26,7 @@ export function splitToGeoFeature(split: DT.SplitBlock, topoPrecinct: Poly.Topo,
         if (! f.properties.packedFields)
         {
           f.properties.packedFields = PF.packedCopy(b.properties.packedFields);
+          f.properties.packedIndex = b.properties.packedIndex;
           f.properties.getDatasetField = b.properties.getDatasetField;
         }
         else

@@ -120,11 +120,6 @@ export type DSLists = {
 
 export type PlanTypePlus = PlanType | '';
 
-export function fGetJoined(f: any): any[]
-{
-  return (f.properties && f.properties.joined) ? f.properties.joined : undefined;
-}
-
 export function fGet(f: any, p: string): any
 {
   return fGetW(f, null, p);
@@ -148,30 +143,6 @@ function fGetW(f: any, datasetKey: string, p: string): any
       return f.properties.datasets[datasetKey][pBackup];
   }
 
-  // Joined property?
-  let a: any[] = fGetJoined(f);
-  if (a)
-  {
-    for (let i: number = 0; i < a.length; i++)
-    {
-      let o: any = a[i];
-      if (!datasetKey)
-      {
-        if (o[p] !== undefined)
-          return o[p];
-      }
-      else
-      {
-        if (o['datasets'] && o['datasets'][datasetKey] != null)
-        {
-          if (o['datasets'][datasetKey][p] != null)
-            return o['datasets'][datasetKey][p];
-          else if (pBackup && o['datasets'][datasetKey][pBackup] != null)
-            return o['datasets'][datasetKey][pBackup];
-        }
-      }
-    }
-  }
   return undefined;
 }
 
@@ -195,10 +166,11 @@ export function computeMetaIndex(datasetid: string, meta: DatasetsMeta): PackedM
         });
       index.fields[datasetKey] = fieldsIndex;
     });
-  let groupindex = { [datasetid]: index };
   index.length = offset;
   index.getDatasetField = (f: any, dataset: string, field: string): number => {
       let pf = retrievePackedFields(f);
+      let groupindex = retrievePackedIndex(f);
+      let datasetid = dataset.length > 20 ? dataset : ''; // hack - extended datasets use 26 char guids, built-in ones are short
       return getPackedField(groupindex, pf, datasetid, dataset, field);
     };
   return index;
@@ -229,6 +201,7 @@ export function computePackedFields(f: any, index: PackedMetaIndex): PackedField
           af[fields[field]] = n;
         });
     });
+  f.properties.packedIndex = { ['']: index };
   f.properties.packedFields = { ['']: af };  // cache here
   f.properties.getDatasetField = index.getDatasetField;
 
@@ -245,6 +218,7 @@ export function hasPackedFields(f: any): boolean
 export function setPackedFields(f: any, pf: PackedFields, fIndex: any): void
 {
   if (f.properties.packedFields !== undefined) throw 'Packed fields already set';
+  f.properties.packedIndex = fIndex.properties.packedIndex;
   f.properties.packedFields = pf;
   f.properties.getDatasetField = fIndex.properties.getDatasetField
 }
@@ -258,7 +232,7 @@ export function isExtDataset(did: string): boolean
 export type ExtPackedFields = Uint32Array; // [nblocks][nfields][fields]...
 export type ExtBlockCardinality = Map<string, number>;
 
-export function featurePushExtPackedFields(f: any, datasetid: string, data: ExtPackedFields, card: ExtBlockCardinality): void
+export function featurePushExtPackedFields(f: any, datasetid: string, index: PackedMetaIndex, data: ExtPackedFields, card: ExtBlockCardinality): void
 {
   let blocks = f?.properties?.blocks || (card.has(f.properties.id) ? [ f.properties.id ] : null);
   if (!blocks)
@@ -281,6 +255,7 @@ export function featurePushExtPackedFields(f: any, datasetid: string, data: ExtP
           pfa[i] += data[x++];
       });
   f.properties.packedFields[datasetid] = pfa;
+  f.properties.packedIndex[datasetid] = index;
 }
 
 export function featurePushedExtPackedFields(f: any, datasetid: string, card: ExtBlockCardinality): boolean
@@ -307,6 +282,12 @@ export function retrievePackedFields(f: any): PackedFields
 {
   if (f.properties.packedFields === undefined) throw 'Feature should have pre-computed packed fields';
   return f.properties.packedFields as PackedFields;
+}
+
+export function retrievePackedIndex(f: any): GroupPackedMetaIndex
+{
+  if (f.properties.packedIndex === undefined) throw 'Feature should have pre-computed packed index';
+  return f.properties.packedIndex as GroupPackedMetaIndex;
 }
 
 // The first entry in the PackedFields aggregate is the count of items aggregated.
