@@ -175,6 +175,13 @@ function fGetW(f: any, datasetKey: string, p: string): any
   return undefined;
 }
 
+export function sortedFieldList(ds: DatasetMeta): string[]
+{
+  let keys = Object.keys(ds.fields);
+  let kv = keys.map(k => { return { k, v: ds.fields[k] } }).sort((a: any, b: any) => { return (a.v.order || 0) - (b.v.order || 0) });
+  return kv.map(kv => kv.k);
+}
+
 export function computeMetaIndex(datasetid: string, meta: DatasetsMeta): PackedMetaIndex
 {
   if (meta == null) return null;
@@ -183,7 +190,7 @@ export function computeMetaIndex(datasetid: string, meta: DatasetsMeta): PackedM
   Object.keys(meta).forEach((datasetKey: string) => {
       let dataset = meta[datasetKey];
       let fieldsIndex: PackedFieldsIndex = {};
-      Object.keys(dataset.fields).forEach((field: string) => {
+      sortedFieldList(dataset).forEach((field: string) => {
           fieldsIndex[field] = offset++;
         });
       index.fields[datasetKey] = fieldsIndex;
