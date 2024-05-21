@@ -95,12 +95,13 @@ export interface PrimaryDatasetKeys
 export interface DatasetContext
 {
   dsIndex: GroupPackedMetaIndex;
+  dsMeta: DatasetsMeta;
   primeDDS: string;     // Demographic (Census)
   primeVDS: string;     // VAP/CVAP
   primeEDS: string;     // Election
-  datasetMetaDDS: DatasetMeta;
-  datasetMetaVDS: DatasetMeta;
-  datasetMetaEDS: DatasetMeta;
+  //datasetMetaDDS: DatasetMeta;
+  //datasetMetaVDS: DatasetMeta;
+  //datasetMetaEDS: DatasetMeta;
 }
 
 // Dataset Lists

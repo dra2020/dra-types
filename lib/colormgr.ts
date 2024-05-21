@@ -1,5 +1,6 @@
 // App libraries
 import * as PF from "./packedfields";
+import {isColorBy, parseColorBy} from './datasets';
 import {Util, Colors} from '@dra2020/baseclient'
 
 // All Groups Mosaic has 16 colors
@@ -504,6 +505,7 @@ export interface DistrictCache
 {
   colorElection?: string;
   colorEthnic?: string;
+  colorExtended?: string;
   colorSolid?: string;
 }
 
@@ -523,6 +525,41 @@ export interface DistrictColorParams
   useFirstColor: boolean,
   usePalette: string,
   colorDistrictsBy: string,
+}
+
+export function ToExtendedColor(agg: PF.PackedFields, dc: PF.DatasetContext, colorBy: string): string
+{
+  // compute pct
+  const {datasetid, field} = parseColorBy(colorBy);
+  if (!datasetid || !field || !dc.dsMeta || !dc.dsMeta[datasetid] || !dc.dsMeta[datasetid]?.fields[field]) return '#ffffff';
+  const meta = dc.dsMeta[datasetid];
+  let getter = PF.ToGetter(agg, dc, datasetid, datasetid);
+  let fields = PF.sortedFieldList(meta);
+  let den = 0;
+  if (meta.fields['Tot'])
+    den = getter('Tot');
+  else
+    fields.forEach(f => { den += getter(f) });
+  let num = 0;
+  let dfield = meta.fields[field];
+  if (dfield.colorBySum)
+    for (let i = 0; i < fields.length; i++)
+    {
+      num += getter(fields[i]);
+      if (fields[i] === field)
+        break;
+    }
+  else
+    num = getter(field);
+
+  // Careful...
+  if (den == 0 || den === undefined || isNaN(den) || num === undefined || isNaN(num))
+    return '#ffffff';
+
+  const pct = dfield.invert ? 1 - (num / den) : num / den;
+  const color = Util.execGradient(makeStops(EthnicFewStops, Colors.EthnicFewClassicColors), pct);
+
+  return color;
 }
 
 export function computeDistrictColors(params: DistrictColorParams): DistrictCache[]
@@ -554,7 +591,13 @@ export function computeDistrictColors(params: DistrictColorParams): DistrictCach
         dc.colorSolid = dc.colorEthnic;
         break;
       default:
-        dc.colorSolid = mapColor;
+        if (isColorBy(params.colorDistrictsBy))
+        {
+          dc.colorExtended = ToExtendedColor(agg, params.datasetContext, params.colorDistrictsBy);
+          dc.colorSolid = dc.colorExtended;
+        }
+        else
+          dc.colorSolid = mapColor;
         break;
     }
     dcNew.push(dc);
