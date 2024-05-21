@@ -31,6 +31,12 @@ export function parseColorBy(colorby: string): { datasetid: string, field: strin
   return { datasetid: '', field: '' };
 }
 
+export function isColorBy(colorby: string): boolean
+{
+  let {datasetid, field} = parseColorBy(colorby);
+  return !!datasetid && !!field;
+}
+
 // For Partisan fields, expect keys of 'D', 'R' and 'Tot'
 // For Demographic Fields, expect keys of 'Tot', 'Wh', 'Bl', 'His', 'AsnPI', 'Nat', 'Oth',
 //  'Asn', 'Pac', 'OthAl', 'Mix', 'BlC', 'NatC', 'AsnC', 'PacC', 
