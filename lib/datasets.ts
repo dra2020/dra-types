@@ -15,6 +15,22 @@ export function sortFields(f1: DatasetField, f2: DatasetField): number
   return (f1.order || 0) - (f2.order || 0);
 }
 
+export function formColorBy(datasetid: string, field: string): string
+{
+  return `${datasetid}:${field}`
+}
+
+export function parseColorBy(colorby: string): { datasetid: string, field: string }
+{
+  if (colorby)
+  {
+    let a = colorby.split(':');
+    if (a?.length == 2)
+      return { datasetid: a[0], field: a[1] };
+  }
+  return { datasetid: '', field: '' };
+}
+
 // For Partisan fields, expect keys of 'D', 'R' and 'Tot'
 // For Demographic Fields, expect keys of 'Tot', 'Wh', 'Bl', 'His', 'AsnPI', 'Nat', 'Oth',
 //  'Asn', 'Pac', 'OthAl', 'Mix', 'BlC', 'NatC', 'AsnC', 'PacC', 
