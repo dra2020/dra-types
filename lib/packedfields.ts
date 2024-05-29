@@ -230,6 +230,11 @@ export function isExtDataset(did: string): boolean
   return did && reExtDataset.test(did);
 }
 
+export function toDatasetID(datasetKey: string): string
+{
+  return isExtDataset(datasetKey) ? datasetKey : '';
+}
+
 export type ExtPackedFields = Uint32Array; // [nblocks][nfields][fields]...
 export type ExtBlockCardinality = Map<string, number>;
 

@@ -173,7 +173,8 @@ export function ToAllEthnicColor(agg: PF.PackedFields, dc: PF.DatasetContext, pd
 {
   // Use VAP/CVAP if it exists
   const dataset: string = dc.primeVDS ? dc.primeVDS : dc.primeDDS
-  return AggregateEthnicColor(PF.ToGetter(agg, dc, '', dataset), pd, dataset.endsWith('NH'));
+  const did = PF.toDatasetID(dataset);
+  return AggregateEthnicColor(PF.ToGetter(agg, dc, did, dataset), pd, dataset.endsWith('NH'));
 }
 
 export function ToPartisanColorStr(agg: PF.PackedFields, dc: PF.DatasetContext, pd: PaletteDefaults): string
@@ -188,10 +189,12 @@ export function ToPartisanDistrictColor(agg: PF.PackedFields, dc: PF.DatasetCont
 
 function ToPartisanColor(agg: PF.PackedFields, dc: PF.DatasetContext, stops: Util.GradientStops): string
 {
+  const did = PF.toDatasetID(dc.primeEDS);
+
   if (dc.primeEDS === PF.DS_PVI2020)
   {
-    const getter16 = PF.ToGetter(agg, dc, '', PF.DS_PRES2016);
-    const getter20 = PF.ToGetter(agg, dc, '', PF.DS_PRES2020);
+    const getter16 = PF.ToGetter(agg, dc, did, PF.DS_PRES2016);
+    const getter20 = PF.ToGetter(agg, dc, did, PF.DS_PRES2020);
 
     const pviRaw = PF.calcRaw2020Pvi(getter16, getter20);
     const color: string = ColorFromRGBPcts((1 - pviRaw / 100), 0, pviRaw / 100, stops);
@@ -200,14 +203,14 @@ function ToPartisanColor(agg: PF.PackedFields, dc: PF.DatasetContext, stops: Uti
   }
   else if (dc.primeEDS === PF.DS_PVI2016)
   {
-    const getter = PF.ToGetter(agg, dc, '', dc.primeEDS);
+    const getter = PF.ToGetter(agg, dc, did, dc.primeEDS);
     const pviRaw = PF.calcRawPvi(getter);
     const color: string = ColorFromRGBPcts((1 - pviRaw/100), 0, pviRaw/100, stops);
     return color;
   }
   else
   {
-    const getter = PF.ToGetter(agg, dc, '', dc.primeEDS);
+    const getter = PF.ToGetter(agg, dc, did, dc.primeEDS);
     return AggregatePartisanColorStr(getter, stops);
   }
 }
@@ -234,6 +237,7 @@ export function ToEthnicColorStr(agg: PF.PackedFields, dc: PF.DatasetContext, pd
   let total: string = 'Tot';
   let bInvert: boolean = false;
   const dataset = dc.primeVDS ? dc.primeVDS : dc.primeDDS;
+  const did = PF.toDatasetID(dataset);
   switch (detail)
   {
     case null: case '': case 'all':
@@ -252,7 +256,7 @@ export function ToEthnicColorStr(agg: PF.PackedFields, dc: PF.DatasetContext, pd
     default: break;
   }
 
-  const getter = PF.ToGetter(agg, dc, '', dataset);
+  const getter = PF.ToGetter(agg, dc, did, dataset);
   let den = getter(total);
   let num = getter(ethnic);
   if (den === undefined || isNaN(den) || num === undefined || isNaN(num))
