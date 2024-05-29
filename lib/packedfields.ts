@@ -171,7 +171,7 @@ export function computeMetaIndex(datasetid: string, meta: DatasetsMeta): PackedM
   index.getDatasetField = (f: any, dataset: string, field: string): number => {
       let pf = retrievePackedFields(f);
       let groupindex = retrievePackedIndex(f);
-      let datasetid = dataset.length > 20 ? dataset : ''; // hack - extended datasets use 26 char guids, built-in ones are short
+      let datasetid = toDatasetID(dataset);
       return getPackedField(groupindex, pf, datasetid, dataset, field);
     };
   return index;
@@ -449,16 +449,18 @@ export function ToGetterPvi20(agg: PackedFields, dc: DatasetContext): FieldGette
 
 export function calcShift(agg: PackedFields, dc: DatasetContext, datasetOld: string, datasetNew: string): number
 {
+  const didOld = toDatasetID(datasetOld);
+  const didNew = toDatasetID(datasetNew);
   const getterOld = datasetOld === DS_PVI2016 ?
     ToGetterPvi16(agg, dc, datasetOld) :
     datasetOld === DS_PVI2020 ?
       ToGetterPvi20(agg, dc) :
-      ToGetter(agg, dc, '', datasetOld);
+      ToGetter(agg, dc, didOld, datasetOld);
   const getterNew = datasetNew === DS_PVI2016 ?
     ToGetterPvi16(agg, dc, datasetNew) :
     datasetNew === DS_PVI2020 ?
       ToGetterPvi20(agg, dc) :
-      ToGetter(agg, dc, '', datasetNew);
+      ToGetter(agg, dc, didNew, datasetNew);
 
   // Calc two-party Swing
   const repOld = getterOld('R');
