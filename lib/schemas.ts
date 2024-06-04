@@ -235,6 +235,7 @@ export let Schemas: any = {
         official: 'BOOL',
         state: 'S',
         datasource: 'S',
+        groups: 'M',
         // meta: { dataset metadata structure },
         // dotmap: 'BOOL',
       },
@@ -265,6 +266,16 @@ export let Schemas: any = {
       KeySchema: { id: 'HASH', uid: 'RANGE' },
     },
   'groupsmaps':
+    {
+      FileOptions: { map: true },
+      Schema: {
+        id: 'S',
+        sid: 'S',
+        permission: 'N',
+      },
+      KeySchema: { id: 'HASH', sid: 'RANGE' },
+    },
+  'groupsdatasets':
     {
       FileOptions: { map: true },
       Schema: {

@@ -608,3 +608,87 @@ export function computeDistrictColors(params: DistrictColorParams): DistrictCach
   }
   return dcNew;
 }
+
+// Dotmap support
+export interface RGB { r: number, g: number, b: number };
+
+export const BinRed = 0
+export const BinOrangeRed = 1;
+export const BinBrown = 2;
+export const BinOrange = 3;
+export const BinGold = 4;
+export const BinYellow = 5;
+export const BinGreenish = 6;
+export const BinChartreuse = 7;
+export const BinLime = 8;
+export const BinMediumSpringGreen = 9;
+export const BinCyan = 10;
+export const BinLightBlue = 11;
+export const BinBlue = 12;
+export const BinBlueViolet = 13;
+export const BinDarkViolet = 14;
+export const BinMagenta = 15;
+export const BinDeepPink = 16;
+
+export const BinColorLookup: RGB[] = [
+  { r: 0xff, g: 0x00, b: 0x00 },  // 0 - red
+  { r: 0xff, g: 0x45, b: 0x00 },  // 1 - orange red
+  { r: 0x99, g: 0x66, b: 0x33 },  // 2 - brown
+  { r: 0xff, g: 0xaa, b: 0x00 },  // 3 - orange
+  { r: 0xff, g: 0xd7, b: 0x00 },  // 4 - gold
+  { r: 0xff, g: 0xd7, b: 0x00 },  // 5 - yellow
+  { r: 0x9f, g: 0xd4, b: 0x00 },  // 6 - greenish
+  { r: 0x7f, g: 0xff, b: 0x00 },  // 7 - chartreuse
+  { r: 0x00, g: 0xff, b: 0x00 },  // 8 - lime
+  { r: 0x00, g: 0xfa, b: 0x9a },  // 9 - medium spring green
+  { r: 0x00, g: 0xff, b: 0xff },  // 10 - cyan
+  { r: 0x73, g: 0xb2, b: 0xff },  // 11 - light blue
+  { r: 0x00, g: 0x00, b: 0xff },  // 12 - blue
+  { r: 0x8a, g: 0x2b, b: 0xe2 },  // 13 - blue violet
+  { r: 0x94, g: 0x00, b: 0xd3 },  // 14 - dark violet
+  { r: 0xff, g: 0x00, b: 0xff },  // 15 - magenta
+  { r: 0xff, g: 0x14, b: 0x93 },  // 16 - deep pink
+];
+
+// Map ordering to Bin* lookup values
+const ColorOrderEthnic = 'wbaho'; // abcde
+
+// Map number of fields to color selection
+export const FieldCountToColors: { [nfields: number]: number[] } = {
+  [1]: [ BinBrown ],
+  [2]: [ BinRed, BinBlue ],
+  [3]: [ BinRed, BinBlue, BinBrown ],
+  [4]: [ BinRed, BinBlue, BinBrown, BinGreenish ],
+  [5]: [ BinLightBlue, BinGreenish, BinRed, BinOrange, BinBrown ],
+  [6]: [ BinRed, BinBrown, BinGold, BinGreenish, BinLightBlue, BinBlueViolet ],
+  [7]: [ BinRed, BinBrown, BinGold, BinGreenish, BinLightBlue, BinBlueViolet, BinMagenta ],
+  [8]: [ BinRed, BinBrown, BinGold, BinGreenish, BinLightBlue, BinBlueViolet, BinMagenta, BinDeepPink ],
+  [9]: [ BinRed, BinBrown, BinGold, BinGreenish, BinLightBlue, BinBlue, BinBlueViolet, BinMagenta, BinDeepPink ],
+  [10]: [ BinRed, BinBrown, BinGold, BinGreenish, BinCyan, BinLightBlue, BinBlue, BinBlueViolet, BinMagenta, BinDeepPink ],
+  [11]: [ BinRed, BinBrown, BinGold, BinGreenish, BinLime, BinCyan, BinLightBlue, BinBlue, BinBlueViolet, BinMagenta, BinDeepPink ],
+  [12]: [ BinRed, BinBrown, BinOrange, BinGold, BinGreenish, BinLime, BinCyan, BinLightBlue, BinBlue, BinBlueViolet, BinMagenta, BinDeepPink ],
+  [13]: [ BinRed, BinBrown, BinOrange, BinGold, BinGreenish, BinLime, BinMediumSpringGreen, BinCyan, BinLightBlue, BinBlue, BinBlueViolet, BinMagenta, BinDeepPink ],
+  [14]: [ BinRed, BinOrangeRed, BinBrown, BinOrange, BinGold, BinGreenish, BinLime, BinMediumSpringGreen, BinCyan, BinLightBlue, BinBlue, BinBlueViolet, BinMagenta, BinDeepPink ],
+  [15]: [ BinRed, BinOrangeRed, BinBrown, BinOrange, BinGold, BinGreenish, BinLime, BinMediumSpringGreen, BinCyan, BinLightBlue, BinBlue, BinBlueViolet, BinDarkViolet, BinMagenta, BinDeepPink ],
+  [16]: [ BinRed, BinOrangeRed, BinBrown, BinOrange, BinGold, BinYellow, BinGreenish, BinLime, BinMediumSpringGreen, BinCyan, BinLightBlue, BinBlue, BinBlueViolet, BinDarkViolet, BinMagenta, BinDeepPink ],
+};
+const MaxFields = 16;
+
+
+export function colorindexToRGB(colorindex: number): RGB
+{
+  return BinColorLookup[colorindex] || BinColorLookup[BinBrown];
+}
+
+export const ColorFlags = 'abcdefghijklmnopqrstuvwxyz';
+
+export function colorflagToColorindex(nfields: number, colorflag: string): number
+{
+  let i = ColorFlags.indexOf(colorflag);
+  return i >= 0 && nfields > 0 && nfields <= MaxFields ? FieldCountToColors[nfields][i] : BinBrown;
+}
+
+export function colororderToColorindex(nfields: number, order: number): number
+{
+  return order >= 0 && nfields > 0 && nfields <= MaxFields ? FieldCountToColors[nfields][order] : BinBrown;
+}
