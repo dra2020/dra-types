@@ -1,3 +1,5 @@
+import * as G from './groups';
+
 // For use in UI. Keys are used in JSON.
 export interface DatasetField
 {
@@ -76,6 +78,7 @@ export interface Dataset
   dotmap?: boolean,
   blobid?: string,
   meta?: DatasetsMeta,
+  groups?: G.GroupMapIndex,
 }
 
 // Index of database records
