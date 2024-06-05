@@ -346,14 +346,25 @@ export function packedCopy(pf: PackedFields): PackedFields
 export function aggregatePackedFields(agg: PackedFields, pf: PackedFields): PackedFields
 {
   if (agg == null || pf == null) return agg;
-  Object.keys(agg).forEach(datasetid => {
+  Object.keys(pf).forEach(datasetid => {
       let af = agg[datasetid];
       let sf = pf[datasetid];
-      if (sf && sf.length == af.length)
+      if (sf && (!af || sf.length == af.length))
       {
-        let n = af.length;
-        for (let i = 1; i < n; i++)
-          af[i] += sf[i];
+        if (! af)
+        {
+          af = allocPackedFieldsArray(sf.length);
+          af[0] = 0;
+          for (let i = 1; i < sf.length; i++)
+            af[i] = sf[i];
+          agg[datasetid] = af;
+        }
+        else
+        {
+          let n = af.length;
+          for (let i = 1; i < n; i++)
+            af[i] += sf[i];
+        }
         af[0]++;  // count of aggregates
       }
     });
