@@ -10,6 +10,7 @@ export interface DatasetField
   colorBy?: boolean,     // For extended datasets, display in UI
   invert?: boolean,      // For extended datasets, colorby intensity inverted
   colorBySum?: boolean,  // For extended datasets, colorby sums up all fields up to this one (e.g. to show "Poverty Level")
+  colorLabel?: string,   // For extended datasets, provides label for coloring dropdown
   sumOf?: string[],      // Only for import processing
 }
 export function sortFields(f1: DatasetField, f2: DatasetField): number
