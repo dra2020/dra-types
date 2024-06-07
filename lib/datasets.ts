@@ -45,6 +45,9 @@ export function isColorBy(colorby: string): boolean
 //  'Asn', 'Pac', 'OthAl', 'Mix', 'BlC', 'NatC', 'AsnC', 'PacC', 
 export type DatasetFields = { [key: string]: DatasetField };
 
+export type DatasetColor = { intensity: string, colors: string, stops: string };
+export type DatasetColors = { [key: string]: DatasetColor };
+
 export interface DatasetMeta
 {
   type: string,                         // demographic | election | pvi | other
@@ -60,7 +63,7 @@ export interface DatasetMeta
   fields?: DatasetFields,
   detailFormat?: string,                // Optional formatting string for detail results
   detailTooltip?: string,               // Optional tooltips for detailFormat results, separated by newline or ';'
-  detailColor?: string,                 // Optional colorby expressions
+  colors?: DatasetColors,               // Optional colorby expressions
 }
 
 export type DatasetsMeta = { [dataset: string]: DatasetMeta };
