@@ -58,6 +58,9 @@ export interface DatasetMeta
   privateKey?: string,                  // Old-style semi-private datasets
   members?: { [key: number]: string },  // For composites, specifies 
   fields?: DatasetFields,
+  detailFormat?: string,                // Optional formatting string for detail results
+  detailTooltip?: string,               // Optional tooltips for detailFormat results, separated by newline or ';'
+  detailColor?: string,                 // Optional colorby expressions
 }
 
 export type DatasetsMeta = { [dataset: string]: DatasetMeta };
