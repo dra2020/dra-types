@@ -8,9 +8,6 @@ export interface DatasetField
   order?: number,        // For ordering fields in UI
   isCombo?: boolean,     // Built-in, for census combos
   colorBy?: boolean,     // For extended datasets, display in UI
-  invert?: boolean,      // For extended datasets, colorby intensity inverted
-  colorBySum?: boolean,  // For extended datasets, colorby sums up all fields up to this one (e.g. to show "Poverty Level")
-  colorLabel?: string,   // For extended datasets, provides label for coloring dropdown
   sumOf?: string[],      // Only for import processing
 }
 export function sortFields(f1: DatasetField, f2: DatasetField): number
@@ -45,8 +42,21 @@ export function isColorBy(colorby: string): boolean
 //  'Asn', 'Pac', 'OthAl', 'Mix', 'BlC', 'NatC', 'AsnC', 'PacC', 
 export type DatasetFields = { [key: string]: DatasetField };
 
-export type DatasetColor = { intensity: string, colors: string, stops: string };
-export type DatasetColors = { [key: string]: DatasetColor };
+export interface DatasetColor {
+  shortCaption: string,
+  longCaption: string,
+  expr: string,
+  colors: string,
+  stops: string,
+  };
+export type DatasetColors = DatasetColor[];
+
+export interface DatasetFormat {
+  shortCaption: string,
+  longCaption: string,
+  expr: string,
+  };
+export type DatasetFormats = DatasetFormat[];
 
 export interface DatasetMeta
 {
@@ -61,9 +71,8 @@ export interface DatasetMeta
   privateKey?: string,                  // Old-style semi-private datasets
   members?: { [key: number]: string },  // For composites, specifies 
   fields?: DatasetFields,
-  detailFormat?: string,                // Optional formatting string for detail results
-  detailTooltip?: string,               // Optional tooltips for detailFormat results, separated by newline or ';'
   colors?: DatasetColors,               // Optional colorby expressions
+  formats?: DatasetFormats,             // Optional format expressions
 }
 
 export type DatasetsMeta = { [dataset: string]: DatasetMeta };

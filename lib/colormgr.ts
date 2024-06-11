@@ -1,7 +1,7 @@
 // App libraries
 import * as PF from "./packedfields";
-import {isColorBy, parseColorBy} from './datasets';
-import {Util, Colors} from '@dra2020/baseclient'
+import {isColorBy, parseColorBy, DatasetColor, DatasetFormat} from './datasets';
+import {Util, Colors, Detail} from '@dra2020/baseclient'
 
 // All Groups Mosaic has 16 colors
 // Index values into the 16 colors
@@ -531,39 +531,63 @@ export interface DistrictColorParams
   colorDistrictsBy: string,
 }
 
+function safeNumber(n: any): number { n = Number(n); return typeof n !== 'number' || isNaN(n) ? 0 : n }
+function safeStops(s: string): number[]
+{
+  if (!s) return EthnicFewStops;
+  return s.split(',').map(safeNumber);
+}
+function safeColors(s: string): string[]
+{
+  if (!s) return ['#fafafa', '#aaaaaa', '#666666', '#111111'];
+  return s.split(',').map(s => s.trim());
+}
+
 export function ToExtendedColor(agg: PF.PackedFields, dc: PF.DatasetContext, colorBy: string): string
 {
   // compute pct
   const {datasetid, field} = parseColorBy(colorBy);
-  if (!datasetid || !field || !dc.dsMeta || !dc.dsMeta[datasetid] || !dc.dsMeta[datasetid]?.fields[field]) return '#ffffff';
-  const meta = dc.dsMeta[datasetid];
-  let getter = PF.ToGetter(agg, dc, datasetid, datasetid);
-  let fields = PF.sortedFieldList(meta);
-  let den = 0;
-  if (meta.fields['Tot'])
-    den = getter('Tot');
-  else
-    fields.forEach(f => { den += getter(f) });
-  let num = 0;
-  let dfield = meta.fields[field];
-  if (dfield.colorBySum)
-    for (let i = 0; i < fields.length; i++)
-    {
-      num += getter(fields[i]);
-      if (fields[i] === field)
-        break;
-    }
-  else
-    num = getter(field);
-
-  // Careful...
-  if (den == 0 || den === undefined || isNaN(den) || num === undefined || isNaN(num))
+  if (!datasetid || !field || !dc.dsMeta || !dc.dsMeta[datasetid])
     return '#ffffff';
+  const meta = dc.dsMeta[datasetid];
+  const dsfield = meta.fields ? meta.fields[field] : null;
+  const dscolor = meta.colors ? meta.colors.find((c: DatasetColor) => c.shortCaption === field) : null;
+  if (!dsfield && !dscolor)
+    return '#ffffff';
+  if (dscolor)
+  {
+    let stops = safeStops(dscolor.stops);
+    let colors = safeColors(dscolor.colors);
+    if (stops.length != colors.length)
+    {
+      stops = EthnicFewStops;
+      colors = safeColors('');
+    }
+    let o: any = {};
+    let getter = PF.ToGetter(agg, dc, datasetid, datasetid);
+    Object.keys(meta.fields).forEach(f => o[f] = getter(f));
+    let formatter = new Detail.FormatDetail(dscolor.expr);
+    let result = formatter.format(Detail.FormatDetail.prepare(o));
+    let intensity = Math.min(Math.max(result.n || 0, 0), 1);
+    return Util.execGradient(makeStops(stops, colors), intensity);
+  }
+  else
+  {
+    let getter = PF.ToGetter(agg, dc, datasetid, datasetid);
+    let fields = PF.sortedFieldList(meta);
+    let den = 0;
+    if (meta.fields['Tot'])
+      den = getter('Tot');
+    else
+      fields.forEach(f => { den += getter(f) });
+    let num = getter(field);
 
-  const pct = dfield.invert ? 1 - (num / den) : num / den;
-  const color = Util.execGradient(makeStops(EthnicFewStops, Colors.EthnicFewClassicColors), pct);
+    // Careful...
+    if (den == 0 || den === undefined || isNaN(den) || num === undefined || isNaN(num))
+      return '#ffffff';
 
-  return color;
+    return Util.execGradient(makeStops(EthnicFewStops, Colors.EthnicFewClassicColors), num / den);
+  }
 }
 
 export function computeDistrictColors(params: DistrictColorParams): DistrictCache[]
