@@ -93,6 +93,7 @@ export interface Dataset
   datasource?: string,
   dotmap?: boolean,
   blobid?: string,
+  dataid?: string,
   meta?: DatasetsMeta,
   groups?: G.GroupMapIndex,
 }
