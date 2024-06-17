@@ -653,6 +653,14 @@ export const BinBlueViolet = 13;
 export const BinDarkViolet = 14;
 export const BinMagenta = 15;
 export const BinDeepPink = 16;
+export const BinBlack = 17;
+
+// Ethnic colors
+export const BinEthnicWhite = BinLightBlue;
+export const BinEthnicBlack = BinGreenish;
+export const BinEthnicAsian = BinRed;
+export const BinEthnicHispanic = BinOrange;
+export const BinEthnicOther = BinBrown;
 
 export const BinColorLookup: RGB[] = [
   { r: 0xff, g: 0x00, b: 0x00 },  // 0 - red
@@ -672,6 +680,7 @@ export const BinColorLookup: RGB[] = [
   { r: 0x94, g: 0x00, b: 0xd3 },  // 14 - dark violet
   { r: 0xff, g: 0x00, b: 0xff },  // 15 - magenta
   { r: 0xff, g: 0x14, b: 0x93 },  // 16 - deep pink
+  { r: 0x00, g: 0x00, b: 0x00 },  // 17 - black
 ];
 
 // Map ordering to Bin* lookup values
@@ -685,18 +694,18 @@ export const FieldCountToColors: { [nfields: number]: number[] } = {
   [4]: [ BinRed, BinBlue, BinBrown, BinGreenish ],
   [5]: [ BinLightBlue, BinGreenish, BinRed, BinOrange, BinBrown ],
   [6]: [ BinRed, BinBrown, BinGold, BinGreenish, BinLightBlue, BinBlueViolet ],
-  [7]: [ BinRed, BinBrown, BinGold, BinGreenish, BinLightBlue, BinBlueViolet, BinMagenta ],
-  [8]: [ BinRed, BinBrown, BinGold, BinGreenish, BinLightBlue, BinBlueViolet, BinMagenta, BinDeepPink ],
-  [9]: [ BinRed, BinBrown, BinGold, BinGreenish, BinLightBlue, BinBlue, BinBlueViolet, BinMagenta, BinDeepPink ],
-  [10]: [ BinRed, BinBrown, BinGold, BinGreenish, BinCyan, BinLightBlue, BinBlue, BinBlueViolet, BinMagenta, BinDeepPink ],
-  [11]: [ BinRed, BinBrown, BinGold, BinGreenish, BinLime, BinCyan, BinLightBlue, BinBlue, BinBlueViolet, BinMagenta, BinDeepPink ],
-  [12]: [ BinRed, BinBrown, BinOrange, BinGold, BinGreenish, BinLime, BinCyan, BinLightBlue, BinBlue, BinBlueViolet, BinMagenta, BinDeepPink ],
-  [13]: [ BinRed, BinBrown, BinOrange, BinGold, BinGreenish, BinLime, BinMediumSpringGreen, BinCyan, BinLightBlue, BinBlue, BinBlueViolet, BinMagenta, BinDeepPink ],
-  [14]: [ BinRed, BinOrangeRed, BinBrown, BinOrange, BinGold, BinGreenish, BinLime, BinMediumSpringGreen, BinCyan, BinLightBlue, BinBlue, BinBlueViolet, BinMagenta, BinDeepPink ],
-  [15]: [ BinRed, BinOrangeRed, BinBrown, BinOrange, BinGold, BinGreenish, BinLime, BinMediumSpringGreen, BinCyan, BinLightBlue, BinBlue, BinBlueViolet, BinDarkViolet, BinMagenta, BinDeepPink ],
-  [16]: [ BinRed, BinOrangeRed, BinBrown, BinOrange, BinGold, BinYellow, BinGreenish, BinLime, BinMediumSpringGreen, BinCyan, BinLightBlue, BinBlue, BinBlueViolet, BinDarkViolet, BinMagenta, BinDeepPink ],
+  [7]: [ BinRed, BinBrown, BinGold, BinBlueViolet, BinMagenta , BinGreenish, BinLightBlue ],
+  [8]: [ BinRed, BinBrown, BinOrange, BinGold, BinBlueViolet, BinMagenta , BinGreenish, BinLightBlue ],
+  [9]: [ BinRed, BinBrown, BinOrange, BinGold, BinBlueViolet, BinMagenta , BinGreenish, BinLightBlue, BinBlue ],
+  [10]: [ BinRed, BinBrown, BinOrange, BinGold, BinBlueViolet, BinMagenta , BinGreenish, BinCyan, BinLightBlue, BinBlue ],
+  [11]: [ BinRed, BinBrown, BinOrange, BinGold, BinBlueViolet, BinMagenta , BinGreenish, BinLime, BinCyan, BinLightBlue, BinBlue ],
+  [12]: [ BinRed, BinBrown, BinOrange, BinGold, BinBlueViolet, BinMagenta, BinDeepPink, BinGreenish, BinMediumSpringGreen, BinCyan, BinLightBlue, BinBlue ],
+  [13]: [ BinRed, BinBrown, BinOrange, BinGold, BinBlueViolet, BinMagenta, BinDeepPink, BinGreenish, BinLime, BinMediumSpringGreen, BinCyan, BinLightBlue, BinBlue ],
+  [14]: [ BinRed, BinOrangeRed, BinBrown, BinOrange, BinGold, BinBlueViolet, BinMagenta, BinDeepPink, BinGreenish, BinLime, BinMediumSpringGreen, BinCyan, BinLightBlue, BinBlue ],
+  [15]: [ BinRed, BinOrangeRed, BinBrown, BinOrange, BinGold, BinBlueViolet, BinDarkViolet, BinMagenta, BinDeepPink, BinGreenish, BinLime, BinMediumSpringGreen, BinCyan, BinLightBlue, BinBlue ],
+  [16]: [ BinRed, BinOrangeRed, BinBrown, BinOrange, BinGold, BinYellow, BinBlueViolet, BinDarkViolet, BinMagenta, BinDeepPink, BinGreenish, BinLime, BinMediumSpringGreen, BinCyan, BinLightBlue, BinBlue ],
 };
-const MaxFields = 16;
+export const MaxFields = 16;
 
 
 export function colorindexToRGB(colorindex: number): RGB
