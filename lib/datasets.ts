@@ -9,6 +9,7 @@ export interface DatasetField
   isCombo?: boolean,     // Built-in, for census combos
   colorBy?: boolean,     // For extended datasets, display in UI
   sumOf?: string[],      // Only for import processing
+  key?: string,          // Only for import processing, reset field key away from import data
 }
 export function sortFields(f1: DatasetField, f2: DatasetField): number
 {
