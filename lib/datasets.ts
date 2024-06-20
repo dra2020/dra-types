@@ -74,6 +74,7 @@ export interface DatasetMeta
   fields?: DatasetFields,
   colors?: DatasetColors,               // Optional colorby expressions
   formats?: DatasetFormats,             // Optional format expressions
+  displayPercent?: boolean,             // True if details should auto include percent
 }
 
 export type DatasetsMeta = { [dataset: string]: DatasetMeta };
