@@ -529,6 +529,7 @@ export interface DistrictColorParams
   useFirstColor: boolean,
   usePalette: string,
   colorDistrictsBy: string,
+  datasets: string[],
 }
 
 function safeNumber(n: any): number { n = Number(n); return typeof n !== 'number' || isNaN(n) ? 0 : n }
@@ -617,6 +618,13 @@ export function computeDistrictColors(params: DistrictColorParams): DistrictCach
       case 'all':
         dc.colorEthnic = ToEthnicColorStr(agg, params.datasetContext, params.paletteDefaults, params.colorDistrictsBy);
         dc.colorSolid = dc.colorEthnic;
+        break;
+      case 'electshift':
+        if (params.datasets && params.datasets.length >= 2) {
+          dc.colorSolid = ToPartisanShiftColor(agg, params.datasetContext, params.datasets, params.paletteDefaults);
+        } else {
+          dc.colorSolid = mapColor; // if no dataset is selected
+        }
         break;
       default:
         if (isColorBy(params.colorDistrictsBy))
