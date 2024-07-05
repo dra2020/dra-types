@@ -215,7 +215,7 @@ function ToPartisanColor(agg: PF.PackedFields, dc: PF.DatasetContext, stops: Uti
   }
 }
 
-export function ToPartisanShiftColor(agg: PF.PackedFields, dc: PF.DatasetContext, datasets: string[], pd: PaletteDefaults): string
+export function ToPartisanShiftColor(agg: PF.PackedFields, dc: PF.DatasetContext, datasets: string[], pd: PaletteDefaults, isDistrict: boolean): string
 {
   if (!datasets || datasets.length < 2)
     return '';
@@ -223,11 +223,12 @@ export function ToPartisanShiftColor(agg: PF.PackedFields, dc: PF.DatasetContext
   const shift: number = PF.calcShift(agg, dc, datasets[0], datasets[1]);
   if (shift == null)
     return null;
+  
   const rep: number = 0.5 - (shift / 2);
   const dem: number = 0.5 + (shift / 2);
-  const stops: Util.GradientStops = partisanStops(PartisanPrecinctStops, pd);
+  const stops: Util.GradientStops = partisanStops(isDistrict ? PartisanDistrictStops : PartisanPrecinctStops, pd);
   const color: string = ColorFromRGBPcts(rep, 0, dem, stops);
-  //console.log('Shift (r, d, color): (' + rep + ', ' + dem + ', ' + color + ')');
+  // console.log('Shift (r, d, color): (' + rep + ', ' + dem + ', ' + color + ')');
   return color;
 }
 
@@ -529,7 +530,7 @@ export interface DistrictColorParams
   useFirstColor: boolean,
   usePalette: string,
   colorDistrictsBy: string,
-  datasets: string[],
+  shiftDatasets?: string[],
 }
 
 function safeNumber(n: any): number { n = Number(n); return typeof n !== 'number' || isNaN(n) ? 0 : n }
@@ -619,11 +620,14 @@ export function computeDistrictColors(params: DistrictColorParams): DistrictCach
         dc.colorEthnic = ToEthnicColorStr(agg, params.datasetContext, params.paletteDefaults, params.colorDistrictsBy);
         dc.colorSolid = dc.colorEthnic;
         break;
-      case 'electshift':
-        if (params.datasets && params.datasets.length >= 2) {
-          dc.colorSolid = ToPartisanShiftColor(agg, params.datasetContext, params.datasets, params.paletteDefaults);
-        } else {
-          dc.colorSolid = mapColor; // if no dataset is selected
+      case 'elecshift':
+        if (params.shiftDatasets && params.shiftDatasets.length == 2) 
+        {
+          dc.colorSolid = ToPartisanShiftColor(agg, params.datasetContext, params.shiftDatasets, params.paletteDefaults, true);
+        } 
+        else 
+        {
+          dc.colorSolid = mapColor;
         }
         break;
       default:
