@@ -215,7 +215,7 @@ function ToPartisanColor(agg: PF.PackedFields, dc: PF.DatasetContext, stops: Uti
   }
 }
 
-export function ToPartisanShiftColor(agg: PF.PackedFields, dc: PF.DatasetContext, datasets: string[], pd: PaletteDefaults, isDistrict: boolean): string
+export function ToPartisanShiftColor(agg: PF.PackedFields, dc: PF.DatasetContext, datasets: string[], pd: PaletteDefaults, isDistrict?: boolean): string
 {
   if (!datasets || datasets.length < 2)
     return '';
@@ -223,10 +223,12 @@ export function ToPartisanShiftColor(agg: PF.PackedFields, dc: PF.DatasetContext
   const shift: number = PF.calcShift(agg, dc, datasets[0], datasets[1]);
   if (shift == null)
     return null;
+
+  const defaultIsDistrict = isDistrict ?? false; // make the optional isDistrict parameter to false by default
   
   const rep: number = 0.5 - (shift / 2);
   const dem: number = 0.5 + (shift / 2);
-  const stops: Util.GradientStops = partisanStops(isDistrict ? PartisanDistrictStops : PartisanPrecinctStops, pd);
+  const stops: Util.GradientStops = partisanStops(defaultIsDistrict ? PartisanDistrictStops : PartisanPrecinctStops, pd);
   const color: string = ColorFromRGBPcts(rep, 0, dem, stops);
   // console.log('Shift (r, d, color): (' + rep + ', ' + dem + ', ' + color + ')');
   return color;
