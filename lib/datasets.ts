@@ -56,6 +56,7 @@ export interface DatasetFormat {
   shortCaption: string,
   longCaption: string,
   expr: string,
+  numberFormat?: string,  // (locale|integer|general|currency).precision
   };
 export type DatasetFormats = DatasetFormat[];
 
