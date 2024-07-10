@@ -1,12 +1,12 @@
 {
   "name": "@dra2020/dra-types",
-  "version": "1.8.114",
+  "version": "1.8.116",
   "description": "Shared types used between client, server and tools.",
   "main": "dist/dra-types.js",
   "types": "./dist/all.d.ts",
   "scripts": {
     "test": "echo \"No test defined.\"",
-    "build": "npx webpack",
+    "build": "webpack",
     "webpack": "node_modules/.bin/webpack"
   },
   "repository": {
