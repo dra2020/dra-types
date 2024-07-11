@@ -228,7 +228,7 @@ export function ToPartisanShiftColor(agg: PF.PackedFields, dc: PF.DatasetContext
   
   const rep: number = 0.5 - (shift / 2);
   const dem: number = 0.5 + (shift / 2);
-  const stops: Util.GradientStops = partisanStops(defaultIsDistrict ? PartisanDistrictStops : PartisanPrecinctStops, pd);
+  const stops: Util.GradientStops = defaultIsDistrict ? partisanDistrictStops(PartisanDistrictStops, pd) : partisanStops(PartisanPrecinctStops, pd);
   const color: string = ColorFromRGBPcts(rep, 0, dem, stops);
   // console.log('Shift (r, d, color): (' + rep + ', ' + dem + ', ' + color + ')');
   return color;
