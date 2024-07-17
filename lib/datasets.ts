@@ -90,6 +90,8 @@ export interface Dataset
   createTime?: string,
   modifyTime?: string,
   deleted?: boolean,
+  expunged?: boolean,
+  expungeDate?: string,
   published?: string,
   official?: boolean,
   state?: string,
@@ -99,6 +101,7 @@ export interface Dataset
   dataid?: string,
   meta?: DatasetsMeta,
   groups?: G.GroupMapIndex,
+  labels?: string[],
 }
 
 // Index of database records
