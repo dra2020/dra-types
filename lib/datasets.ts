@@ -94,7 +94,7 @@ export interface Dataset
   expungeDate?: string,
   published?: string,
   official?: boolean,
-  builtin?: boolean,
+  builtin?: string,
   state?: string,
   datasource?: string,
   dotmap?: boolean,
