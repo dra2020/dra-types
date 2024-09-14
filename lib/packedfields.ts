@@ -154,6 +154,14 @@ export function sortedFieldList(ds: DatasetMeta): string[]
   return kv.map(kv => kv.k);
 }
 
+export function getDatasetField(f: any, dataset: string, field: string): number
+{
+  let pf = retrievePackedFields(f);
+  let dxGroup = retrievePackedIndex(f);
+  let did = toDatasetID(dataset);
+  return getPackedField(dxGroup, pf, did, dataset, field);
+}
+
 export function computeMetaIndex(datasetid: string, meta: DatasetsMeta): PackedMetaIndex
 {
   if (meta == null) return null;
@@ -168,12 +176,7 @@ export function computeMetaIndex(datasetid: string, meta: DatasetsMeta): PackedM
       index.fields[datasetKey] = fieldsIndex;
     });
   index.length = offset;
-  index.getDatasetField = (f: any, dataset: string, field: string): number => {
-      let pf = retrievePackedFields(f);
-      let groupindex = retrievePackedIndex(f);
-      let datasetid = toDatasetID(dataset);
-      return getPackedField(groupindex, pf, datasetid, dataset, field);
-    };
+  index.getDatasetField = getDatasetField;
   return index;
 }
 
@@ -185,6 +188,15 @@ function allocPackedFieldsArray(length: number): PackedFieldsArray
   nAlloc++;
   //if ((nAlloc % 10000) == 0) console.log(`allocPackedFieldsArray: ${nAlloc} allocs`);
   return af;
+}
+
+export function initPackedFields(f: any): void
+{
+  if (f.properties.packedFields !== undefined) throw 'Packed fields already set';
+
+  f.properties.packedIndex = {};
+  f.properties.packedFields = {};
+  f.properties.getDatasetField = getDatasetField;
 }
 
 export function computePackedFields(f: any, index: PackedMetaIndex): PackedFields
@@ -209,6 +221,34 @@ export function computePackedFields(f: any, index: PackedMetaIndex): PackedField
   // Major memory savings to delete this after packing
   delete f.properties.datasets;
   return f.properties.packedFields;
+}
+
+export function computeOnePackedFields(f: any, index: PackedMetaIndex, did: string, datasetKey: string): PackedFields
+{
+  let af = allocPackedFieldsArray(index.length);
+  af[0] = 0;  // count of number of aggregates
+  let fields = index.fields[did];
+  Object.keys(fields).forEach((field: string) => {
+      let n = fGetW(f, datasetKey, field);
+      if (isNaN(n))
+        n = 0;
+      af[fields[field]] = n;
+    });
+
+  if (! f.properties.packedIndex)
+    initPackedFields(f);
+  f.properties.packedIndex[did] = index;
+  f.properties.packedFields[did] = af;
+  f.properties.getDatasetField = index.getDatasetField;
+
+  return f.properties.packedFields;
+}
+
+export function clearPackedFields(f: any): void
+{
+  delete f.properties.packedIndex;
+  delete f.properties.packedFields;
+  delete f.properties.getDatasetField;
 }
 
 export function hasPackedFields(f: any): boolean
