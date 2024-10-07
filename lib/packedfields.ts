@@ -298,7 +298,7 @@ export function featurePushExtPackedFields(f: any, datasetid: string, index: Pac
           throw(`pushExtPackedFields: missing blockid ${blockid} in cardinality set`);
         let x = 2 + (nfields * card.get(blockid));
         for (let i = 1; i <= nfields; i++)
-          pfa[i] += data[x++];
+          pfa[i] += (data[x++] << 0); // left shift by 0 to force unsigned to be interpreted as signed (used by prisoner-adjusted)
       });
   f.properties.packedFields[datasetid] = pfa;
   f.properties.packedIndex[datasetid] = index;
