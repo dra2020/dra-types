@@ -413,8 +413,11 @@ export function aggregatePackedFields(agg: PackedFields, pf: PackedFields): Pack
 
 export function aggregateCount(agg: PackedFields): number
 {
-  if (!agg || !agg['']) return 0;
-  return agg[''][0];
+  // If we have multiple packedfieldarrays, all of them track the aggregate in zero spot.
+  // So we just pick the one that happens to be come up first.
+  if (!agg) return 0;
+  let pfa = Util.nthProperty(agg) as PackedFieldsArray;
+  return pfa ? pfa[0] : 0;
 }
 
 export function decrementPackedFields(agg: PackedFields, pf: PackedFields): PackedFields
