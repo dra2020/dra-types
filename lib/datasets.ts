@@ -66,11 +66,12 @@ export interface DatasetMeta
   year: number,                         // 4 digit year
   title: string,                        // title displayed in UI
   description?: string,                 // longer description
-  office?: string,                      // pres | comp | sc | sen | con | tre | sos | ltgov | gov | ag
+  office?: string,                      // pres | comp | sc | sen | con | tre | sos | ltgov | gov | ag and more
   subtype?: string,                     // always general?
-  votingAge?: boolean,                  // Filtered demographic variant
-  nhAlone?: boolean,                    // Demographic variant
+  votingAge?: boolean,                  // true => VAP or CVAP; false => Total population (from Census or ACS or Adjusted)
+  nhAlone?: boolean,                    // Non-Hispanic Alone demographic variant
   privateKey?: string,                  // Old-style semi-private datasets
+  restrict?: { [key: string]: boolean },  // export, display, duplicate (true => function is not allowed)
   members?: { [key: number]: string },  // For composites, specifies 
   fields?: DatasetFields,
   colors?: DatasetColors,               // Optional colorby expressions
@@ -104,6 +105,13 @@ export interface Dataset
   meta?: DatasetsMeta,
   groups?: G.GroupMapIndex,
   labels?: string[],
+}
+
+export function datasetRestrict(ds: Dataset): { [key: string]: boolean }
+{
+   if (ds && ds.id && ds.meta && ds.meta[ds.id] && ds.meta[ds.id].restrict)
+    return ds.meta[ds.id].restrict;
+  return null;
 }
 
 // Index of database records
