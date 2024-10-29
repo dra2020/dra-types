@@ -65,6 +65,7 @@ export interface DatasetMeta
   type: string,                         // demographic | election | pvi | other
   year: number,                         // 4 digit year
   title: string,                        // title displayed in UI
+  builtin?: string,                     // builtin key for builtin datasets
   description?: string,                 // longer description
   office?: string,                      // pres | comp | sc | sen | con | tre | sos | ltgov | gov | ag and more
   subtype?: string,                     // always general?
