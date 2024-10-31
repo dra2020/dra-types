@@ -1,6 +1,6 @@
 {
   "name": "@dra2020/dra-types",
-  "version": "1.8.127",
+  "version": "1.8.128",
   "description": "Shared types used between client, server and tools.",
   "main": "dist/dra-types.js",
   "types": "./dist/all.d.ts",
@@ -34,7 +34,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "@dra2020/baseclient": "^1.0.146",
+    "@dra2020/baseclient": "^1.0.147",
     "geojson": "^0.5.0",
     "object-hash": "^3.0.0"
   }
