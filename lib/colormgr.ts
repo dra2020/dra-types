@@ -174,7 +174,8 @@ export function ToAllEthnicColor(agg: PF.PackedFields, dc: PF.DatasetContext, pd
   // Use VAP/CVAP if it exists
   const dataset: string = dc.primeVDS ? dc.primeVDS : dc.primeDDS
   const did = PF.toDatasetID(dataset);
-  return AggregateEthnicColor(PF.ToGetter(agg, dc, did, dataset), pd, dataset.endsWith('NH'));
+  const builtin = dc.dsMeta[did]?.builtin || dataset;
+  return AggregateEthnicColor(PF.ToGetter(agg, dc, did, dataset), pd, builtin.endsWith('NH'));
 }
 
 export function ToPartisanColorStr(agg: PF.PackedFields, dc: PF.DatasetContext, pd: PaletteDefaults): string
@@ -241,6 +242,7 @@ export function ToEthnicColorStr(agg: PF.PackedFields, dc: PF.DatasetContext, pd
   let bInvert: boolean = false;
   const dataset = dc.primeVDS ? dc.primeVDS : dc.primeDDS;
   const did = PF.toDatasetID(dataset);
+  const builtin = dc.dsMeta[did]?.builtin || dataset;
   switch (detail)
   {
     case null: case '': case 'all':
@@ -248,12 +250,12 @@ export function ToEthnicColorStr(agg: PF.PackedFields, dc: PF.DatasetContext, pd
       return c >= 0 ? ethnicBackgroundColor(c, pd) : '#ffffff';
     case 'white': ethnic = 'Wh'; break;
     case 'nonwhite': ethnic = 'Wh'; bInvert = true; break;
-    case 'black': ethnic = dataset.endsWith('NH') ? 'Bl' : 'BlC'; break;
+    case 'black': ethnic = builtin.endsWith('NH') ? 'Bl' : 'BlC'; break;
     case 'hisp': ethnic = 'His'; break;
-    case 'native': ethnic = dataset.endsWith('NH') ? 'Nat' : 'NatC'; break;
+    case 'native': ethnic = builtin.endsWith('NH') ? 'Nat' : 'NatC'; break;
     case 'asianpi': ethnic = 'AsnPI'; break;
-    case 'asian': ethnic = dataset.endsWith('NH') ? 'Asn' : 'AsnC'; break;
-    case 'pac': ethnic = dataset.endsWith('NH') ? 'Pac' : 'PacC'; break;
+    case 'asian': ethnic = builtin.endsWith('NH') ? 'Asn' : 'AsnC'; break;
+    case 'pac': ethnic = builtin.endsWith('NH') ? 'Pac' : 'PacC'; break;
     case 'other': ethnic = 'OthAl'; break;
     case 'mix': ethnic = 'Mix'; break;
     default: break;
