@@ -1,3 +1,5 @@
+import * as G from './groups';
+
 export interface UserLayerMeta
 {
   createdBy: string,
@@ -9,7 +11,10 @@ export interface UserLayerMeta
   modifyTime?: string,
   deleted?: boolean,
   published?: string,
-  official?: boolean
+  official?: boolean,
+  groups?: G.GroupMapIndex,
+  labels?: string[],
+  labelupdate?: { [name: string]: boolean|null }, // just for update purposes, not stored
 }
 
 export type UserLayerMetaIndex = {

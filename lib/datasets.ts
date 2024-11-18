@@ -106,6 +106,7 @@ export interface Dataset
   meta?: DatasetsMeta,
   groups?: G.GroupMapIndex,
   labels?: string[],
+  labelupdate?: { [name: string]: boolean|null }, // just for update purposes, not stored
 }
 
 export function datasetRestrict(ds: Dataset): { [key: string]: boolean }
