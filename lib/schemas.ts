@@ -329,4 +329,27 @@ export let Schemas: any = {
           { published: 'HASH' },
         ],  // sparse
     },
+  'places':
+    {
+      FileOptions: { map: true },
+      Schema: {
+        id: 'S',
+        state: 'S',
+        datasource: 'S',
+        name: 'S',
+        description: 'S',
+        labels: 'L',
+        createdBy: 'S',
+        createTime: 'S',
+        modifyTime: 'S',
+        deleted: 'BOOL',
+        published: 'S',
+        official: 'BOOL',
+      },
+      KeySchema: { createdBy: 'HASH', id: 'RANGE' },
+      GlobalSecondaryIndexes: [
+          { id: 'HASH' },
+          { published: 'HASH' },
+        ],  // sparse
+    },
 }
