@@ -66,8 +66,6 @@ export interface StatesMeta
   [key: string]: StatesMetaIndex;    // key is one of the datasource strings
 }
 
-export type PackedFieldsArray = Float64Array;
-export type PackedFields = { [datasetid: string]: PackedFieldsArray };
 export interface PackedFieldsIndex
 {
   [field: string]: number; // offset into PackedFields
@@ -77,10 +75,9 @@ export interface PackedMetaIndex
 {
   length: number;
   fields: { [dataset: string]: PackedFieldsIndex };
-  getDatasetField: (f: any, dataset: string, field: string) => number;
 }
 
-export type GroupPackedMetaIndex = { [datasetid: string]: PackedMetaIndex };
+export type GroupPackedMetaIndex = { [did: string]: PackedMetaIndex };
 
 export interface PrimaryDatasetKeys
 {
@@ -90,11 +87,17 @@ export interface PrimaryDatasetKeys
   ELECTION: string,
 }
 
+export type PackedFieldsArray = Float64Array;
+export interface PackedFields {
+  dsGroup: GroupPackedMetaIndex,
+  data: { [did: string]: PackedFieldsArray }
+}
+
 // This integregates the information associated with a specific state and datasource as
 // well as user selections around which datasets to view. Used to propagate through UI.
 export interface DatasetContext
 {
-  dsIndex: GroupPackedMetaIndex;
+  dsGroup: GroupPackedMetaIndex;
   dsMeta: DatasetsMeta;
   primeDDS: string;     // Demographic (Census)
   primeVDS: string;     // VAP/CVAP
@@ -154,19 +157,17 @@ export function sortedFieldList(ds: DatasetMeta): string[]
   return kv.map(kv => kv.k);
 }
 
-export function getDatasetField(f: any, dataset: string, field: string): number
+export function getDatasetField(f: any, did: string, field: string): number
 {
   let pf = retrievePackedFields(f);
-  let dxGroup = retrievePackedIndex(f);
-  let did = toDatasetID(dataset);
-  return getPackedField(dxGroup, pf, did, dataset, field);
+  return getPackedField(pf, did, field);
 }
 
-export function computeMetaIndex(datasetid: string, meta: DatasetsMeta): PackedMetaIndex
+export function computeMetaIndex(did: string, meta: DatasetsMeta): PackedMetaIndex
 {
   if (meta == null) return null;
   let offset = 1; // first entry is count of aggregates
-  let index: PackedMetaIndex = { length: 0, fields: {}, getDatasetField: null };
+  let index: PackedMetaIndex = { length: 0, fields: {} };
   Object.keys(meta).forEach((datasetKey: string) => {
       let dataset = meta[datasetKey];
       let fieldsIndex: PackedFieldsIndex = {};
@@ -176,8 +177,26 @@ export function computeMetaIndex(datasetid: string, meta: DatasetsMeta): PackedM
       index.fields[datasetKey] = fieldsIndex;
     });
   index.length = offset;
-  index.getDatasetField = getDatasetField;
   return index;
+}
+
+export function computeOnePackedFields(f: any, dsGroup: GroupPackedMetaIndex, index: PackedMetaIndex, did: string, datasetKey: string): PackedFields
+{
+  let af = allocPackedFieldsArray(index.length);
+  af[0] = 0;  // count of number of aggregates
+  let fields = index.fields[did];
+  Object.keys(fields).forEach((field: string) => {
+      let n = fGetW(f, datasetKey, field);
+      if (isNaN(n))
+        n = 0;
+      af[fields[field]] = n;
+    });
+
+  if (! f.properties.packedFields)
+    initPackedFields(f, dsGroup);
+  f.properties.packedFields.data[did] = af;
+
+  return f.properties.packedFields;
 }
 
 let nAlloc = 0;
@@ -190,65 +209,16 @@ function allocPackedFieldsArray(length: number): PackedFieldsArray
   return af;
 }
 
-export function initPackedFields(f: any): void
+export function initPackedFields(f: any, dsGroup: GroupPackedMetaIndex): void
 {
   if (f.properties.packedFields !== undefined) throw 'Packed fields already set';
 
-  f.properties.packedIndex = {};
-  f.properties.packedFields = {};
-  f.properties.getDatasetField = getDatasetField;
-}
-
-export function computePackedFields(f: any, index: PackedMetaIndex): PackedFields
-{
-  if (f.properties.packedFields) return f.properties.packedFields as PackedFields;
-
-  let af = allocPackedFieldsArray(index.length);
-  af[0] = 0;  // count of number of aggregates
-  Object.keys(index.fields).forEach((dataset: string) => {
-      let fields = index.fields[dataset];
-      Object.keys(fields).forEach((field: string) => {
-          let n = fGetW(f, dataset, field);
-          if (isNaN(n))
-            n = 0;
-          af[fields[field]] = n;
-        });
-    });
-  f.properties.packedIndex = { ['']: index };
-  f.properties.packedFields = { ['']: af };  // cache here
-  f.properties.getDatasetField = index.getDatasetField;
-
-  // Major memory savings to delete this after packing
-  delete f.properties.datasets;
-  return f.properties.packedFields;
-}
-
-export function computeOnePackedFields(f: any, index: PackedMetaIndex, did: string, datasetKey: string): PackedFields
-{
-  let af = allocPackedFieldsArray(index.length);
-  af[0] = 0;  // count of number of aggregates
-  let fields = index.fields[did];
-  Object.keys(fields).forEach((field: string) => {
-      let n = fGetW(f, datasetKey, field);
-      if (isNaN(n))
-        n = 0;
-      af[fields[field]] = n;
-    });
-
-  if (! f.properties.packedIndex)
-    initPackedFields(f);
-  f.properties.packedIndex[did] = index;
-  f.properties.packedFields[did] = af;
-  f.properties.getDatasetField = index.getDatasetField;
-
-  return f.properties.packedFields;
+  f.properties.packedFields = { dsGroup, data: {} };
 }
 
 export function clearPackedFields(f: any): void
 {
-  delete f.properties.packedIndex;
   delete f.properties.packedFields;
-  delete f.properties.getDatasetField;
 }
 
 export function hasPackedFields(f: any): boolean
@@ -256,12 +226,10 @@ export function hasPackedFields(f: any): boolean
   return f.properties.packedFields !== undefined;
 }
 
-export function setPackedFields(f: any, pf: PackedFields, fIndex: any): void
+export function setPackedFields(f: any, pf: PackedFields): void
 {
   if (f.properties.packedFields !== undefined) throw 'Packed fields already set';
-  f.properties.packedIndex = fIndex.properties.packedIndex;
   f.properties.packedFields = pf;
-  f.properties.getDatasetField = fIndex.properties.getDatasetField
 }
 
 const reExtDataset = /^.*\.ds$/;
@@ -270,24 +238,18 @@ export function isExtDataset(did: string): boolean
   return did && reExtDataset.test(did);
 }
 
-export function toDatasetID(datasetKey: string): string
-{
-  return isExtDataset(datasetKey) ? datasetKey : '';
-}
-
 export type ExtPackedFields = Uint32Array; // [nblocks][nfields][fields]...
 export type ExtBlockCardinality = Map<string, number>;
 
-export function featurePushExtPackedFields(f: any, datasetid: string, index: PackedMetaIndex, data: ExtPackedFields, card: ExtBlockCardinality): void
+export function pushExtPackedFields(blocks: string[], pf: PackedFields, did: string, index: PackedMetaIndex, data: ExtPackedFields, card: ExtBlockCardinality): void
 {
-  let blocks = f?.properties?.blocks || (card.has(f.properties.id) ? [ f.properties.id ] : null);
   if (!blocks)
     return;
-  if (!f.properties.packedFields)
-    throw('pushExtPackedFields: base datasets should be pushed first');
+  if (! pf)
+    throw('pushExtPackedFields: packed fields should be initialized before push');
   if (card.size != data[0])
     throw('pushExtPackedFields: packed fields and block cardinality do not match');
-  if (f.properties.packedFields[datasetid])
+  if (pf.data[did])
     return; // already pushed
   let nfields = data[1];
   let pfa = allocPackedFieldsArray(nfields+1);  // field count
@@ -300,26 +262,31 @@ export function featurePushExtPackedFields(f: any, datasetid: string, index: Pac
         for (let i = 1; i <= nfields; i++)
           pfa[i] += (data[x++] << 0); // left shift by 0 to force unsigned to be interpreted as signed (used by prisoner-adjusted)
       });
-  f.properties.packedFields[datasetid] = pfa;
-  f.properties.packedIndex[datasetid] = index;
+  pf.data[did] = pfa;
 }
 
-export function featurePushedExtPackedFields(f: any, datasetid: string, card: ExtBlockCardinality): boolean
+export function featurePushExtPackedFields(f: any, did: string, index: PackedMetaIndex, data: ExtPackedFields, card: ExtBlockCardinality): void
+{
+  let blocks = f?.properties?.blocks || (card.has(f.properties.id) ? [ f.properties.id ] : null);
+  pushExtPackedFields(blocks, f.properties.packedFields, did, index, data, card);
+}
+
+export function featurePushedExtPackedFields(f: any, did: string, card: ExtBlockCardinality): boolean
 {
   if (! f) return true;
-  if (f.features) return featurePushedExtPackedFields(f.features[0], datasetid, card);
+  if (f.features) return featurePushedExtPackedFields(f.features[0], did, card);
   if (!f?.properties?.blocks && !card.has(f.properties.id))
     return true;
   if (!f.properties.packedFields)
     return true;
-  return !!f.properties.packedFields[datasetid];
+  return !!f.properties.packedFields.data[did];
 }
 
 export function pushedExtPackedFields(pf: PackedFields, datasetids: string[]): boolean
 {
   if (pf && datasetids)
     for (let i = 0; i < datasetids.length; i++)
-      if (! pf[datasetids[i]])
+      if (! pf.data[datasetids[i]])
         return false;
   return !!pf;
 }
@@ -330,28 +297,22 @@ export function retrievePackedFields(f: any): PackedFields
   return f.properties.packedFields as PackedFields;
 }
 
-export function retrievePackedIndex(f: any): GroupPackedMetaIndex
-{
-  if (f.properties.packedIndex === undefined) throw 'Feature should have pre-computed packed index';
-  return f.properties.packedIndex as GroupPackedMetaIndex;
-}
-
-// The first entry in the PackedFields aggregate is the count of items aggregated.
+// The first entry in the PackedFieldsArray aggregate is the count of items aggregated.
 // Treat a null instance as just a single entry with no aggregates.
 let abZero = new ArrayBuffer(8);
 let afZero = new Float64Array(abZero);
 afZero[0] = 0;
-let pfZero = { ['']: afZero };
+let pfZero = { dsGroup: {}, data: { ['']: afZero } };
 
-export function zeroPackedFields(index: GroupPackedMetaIndex): PackedFields
+export function zeroPackedFields(dsGroup: GroupPackedMetaIndex): PackedFields
 {
-  if (index == null) return pfZero;
-  let pf: PackedFields = {};
-  Object.keys(index).forEach(datasetid => {
-      let af = allocPackedFieldsArray(index[datasetid].length);
+  if (dsGroup == null) return pfZero;
+  let pf: PackedFields = { dsGroup, data: {} };
+  Object.keys(dsGroup).forEach(did => {
+      let af = allocPackedFieldsArray(dsGroup[did].length);
       for (let i = 0; i < af.length; i++)
         af[i] = 0;
-      pf[datasetid] = af;
+      pf.data[did] = af;
     });
   return pf;
 }
@@ -359,12 +320,12 @@ export function zeroPackedFields(index: GroupPackedMetaIndex): PackedFields
 export function zeroPackedCopy(pf: PackedFields): PackedFields
 {
   if (pf == null) return pfZero;
-  let copy: PackedFields = {};
-  Object.keys(pf).forEach(datasetid => {
-      let cf = allocPackedFieldsArray(pf[datasetid].length);
+  let copy: PackedFields = { dsGroup: pf.dsGroup, data: {} };
+  Object.keys(pf.data).forEach(did => {
+      let cf = allocPackedFieldsArray(pf.data[did].length);
       for (let i = 0; i < cf.length; i++)
         cf[i] = 0;
-      copy[datasetid] = cf;
+      copy.data[did] = cf;
     });
   return copy;
 }
@@ -372,13 +333,13 @@ export function zeroPackedCopy(pf: PackedFields): PackedFields
 export function packedCopy(pf: PackedFields): PackedFields
 {
   if (pf == null) return null;
-  let copy: PackedFields = {};
-  Object.keys(pf).forEach(datasetid => {
-      let af = pf[datasetid];
+  let copy: PackedFields = { dsGroup: pf.dsGroup, data: {} };
+  Object.keys(pf.data).forEach(did => {
+      let af = pf.data[did];
       let cf = allocPackedFieldsArray(af.length);
       for (let i = 0; i < af.length; i++)
         cf[i] = af[i];
-      copy[datasetid] = cf;
+      copy.data[did] = cf;
     });
   return copy;
 }
@@ -386,9 +347,9 @@ export function packedCopy(pf: PackedFields): PackedFields
 export function aggregatePackedFields(agg: PackedFields, pf: PackedFields): PackedFields
 {
   if (agg == null || pf == null) return agg;
-  Object.keys(pf).forEach(datasetid => {
-      let af = agg[datasetid];
-      let sf = pf[datasetid];
+  Object.keys(pf.data).forEach(did => {
+      let af = agg.data[did];
+      let sf = pf.data[did];
       if (sf && (!af || sf.length == af.length))
       {
         if (! af)
@@ -397,7 +358,7 @@ export function aggregatePackedFields(agg: PackedFields, pf: PackedFields): Pack
           af[0] = 0;
           for (let i = 1; i < sf.length; i++)
             af[i] = sf[i];
-          agg[datasetid] = af;
+          agg.data[did] = af;
         }
         else
         {
@@ -416,16 +377,16 @@ export function aggregateCount(agg: PackedFields): number
   // If we have multiple packedfieldarrays, all of them track the aggregate in zero spot.
   // So we just pick the one that happens to be come up first.
   if (!agg) return 0;
-  let pfa = Util.nthProperty(agg) as PackedFieldsArray;
+  let pfa = Util.nthProperty(agg.data) as PackedFieldsArray;
   return pfa ? pfa[0] : 0;
 }
 
 export function decrementPackedFields(agg: PackedFields, pf: PackedFields): PackedFields
 {
   if (agg == null || pf == null) return agg;
-  Object.keys(agg).forEach(datasetid => {
-      let af = agg[datasetid];
-      let sf = pf[datasetid];
+  Object.keys(agg.data).forEach(did => {
+      let af = agg.data[did];
+      let sf = pf.data[did];
       if (sf && sf.length == af.length)
       {
         let n = af.length;
@@ -446,16 +407,16 @@ export function diffPackedFields(main: any, parts: any[]): PackedFields
   return main;
 }
 
-export function getPackedField(index: GroupPackedMetaIndex, pf: PackedFields, datasetid: string, dataset: string, field: string): number
+export function getPackedField(pf: PackedFields, did: string, field: string): number
 {
-  if (!index || !pf || !index[datasetid] || !pf[datasetid]) return 0;
-  let fields = index[datasetid].fields[dataset];
-  return fields ? (fields[field] !== undefined ? pf[datasetid][fields[field]] : 0) : 0;
+  if (!pf || !pf.dsGroup || !pf.dsGroup[did] || !pf.data[did]) return 0;
+  let fields = pf.dsGroup[did].fields[did];
+  return fields ? (fields[field] !== undefined ? pf.data[did][fields[field]] : 0) : 0;
 }
 
-export function findPackedField(index: GroupPackedMetaIndex, pf: PackedFields, datasetid: string, dataset: string, field: string): number
+export function findPackedField(pf: PackedFields, did: string, field: string): number
 {
-  let fields = index[datasetid].fields[dataset];
+  let fields = pf.dsGroup[did].fields[did];
   return fields ? (fields[field] !== undefined ? fields[field] : -1) : -1;
 }
 
@@ -463,58 +424,15 @@ export function findPackedField(index: GroupPackedMetaIndex, pf: PackedFields, d
 export type FieldGetter = (f: string) => number;
 export function fieldGetterNotLoaded(f: string): number { return undefined }
 
-export function ToGetter(agg: PackedFields, dc: DatasetContext, datasetid: string, datasetKey: string): FieldGetter
+export function ToGetter(agg: PackedFields, dc: DatasetContext, did: string): FieldGetter
 {
-  return (field: string) => { return getPackedField(dc.dsIndex, agg, datasetid, datasetKey, field) };
+  return (field: string) => { return getPackedField(agg, did, field) };
 }
 
-export function ToGetterPvi16(agg: PackedFields, dc: DatasetContext, datasetKey: string): FieldGetter
+export function calcShift(agg: PackedFields, dc: DatasetContext, didOld: string, didNew: string): number
 {
-  return (field: string) =>
-  {
-    if (field === 'R')
-      return Math.round((getPackedField(dc.dsIndex, agg, '', datasetKey, 'R12') + getPackedField(dc.dsIndex, agg, '', datasetKey, 'R16')) / 2);
-    if (field === 'D')
-      return Math.round((getPackedField(dc.dsIndex, agg, '', datasetKey, 'D12') + getPackedField(dc.dsIndex, agg, '', datasetKey, 'D16')) / 2);
-    if (field === 'Tot')
-      return Math.round((
-        getPackedField(dc.dsIndex, agg, '', datasetKey, 'R12') + getPackedField(dc.dsIndex, agg, '', datasetKey, 'R16') +
-        getPackedField(dc.dsIndex, agg, '', datasetKey, 'D12') + getPackedField(dc.dsIndex, agg, '', datasetKey, 'D16')) / 2);
-    return 0;
-  };
-}
-
-export function ToGetterPvi20(agg: PackedFields, dc: DatasetContext): FieldGetter
-{
-  return (field: string) =>
-  {
-    if (field === 'R')
-      return Math.round((getPackedField(dc.dsIndex, agg, '', DS_PRES2016, 'R') + getPackedField(dc.dsIndex, agg, '', DS_PRES2020, 'R')) / 2);
-    if (field === 'D')
-      return Math.round((getPackedField(dc.dsIndex, agg, '', DS_PRES2016, 'D') + getPackedField(dc.dsIndex, agg, '', DS_PRES2020, 'D')) / 2);
-    if (field === 'Tot')
-      return Math.round((
-        getPackedField(dc.dsIndex, agg, '', DS_PRES2016, 'R') + getPackedField(dc.dsIndex, agg, '', DS_PRES2020, 'R') +
-        getPackedField(dc.dsIndex, agg, '', DS_PRES2016, 'D') + getPackedField(dc.dsIndex, agg, '', DS_PRES2020, 'D')) / 2);
-    return 0;
-  };
-
-}
-
-export function calcShift(agg: PackedFields, dc: DatasetContext, datasetOld: string, datasetNew: string): number
-{
-  const didOld = toDatasetID(datasetOld);
-  const didNew = toDatasetID(datasetNew);
-  const getterOld = datasetOld === DS_PVI2016 ?
-    ToGetterPvi16(agg, dc, datasetOld) :
-    datasetOld === DS_PVI2020 ?
-      ToGetterPvi20(agg, dc) :
-      ToGetter(agg, dc, didOld, datasetOld);
-  const getterNew = datasetNew === DS_PVI2016 ?
-    ToGetterPvi16(agg, dc, datasetNew) :
-    datasetNew === DS_PVI2020 ?
-      ToGetterPvi20(agg, dc) :
-      ToGetter(agg, dc, didNew, datasetNew);
+  const getterOld = ToGetter(agg, dc, didOld);
+  const getterNew = ToGetter(agg, dc, didNew);
 
   // Calc two-party Swing
   const repOld = getterOld('R');
