@@ -24,11 +24,7 @@ export function splitToGeoFeature(split: DT.SplitBlock, topoPrecinct: Poly.Topo,
       if (b.properties.packedFields)
       {
         if (! f.properties.packedFields)
-        {
           f.properties.packedFields = PF.packedCopy(b.properties.packedFields);
-          f.properties.packedIndex = b.properties.packedIndex;
-          f.properties.getDatasetField = b.properties.getDatasetField;
-        }
         else
           PF.aggregatePackedFields(f.properties.packedFields, b.properties.packedFields);
       }
