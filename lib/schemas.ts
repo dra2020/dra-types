@@ -295,6 +295,16 @@ export let Schemas: any = {
       },
       KeySchema: { createdBy: 'HASH', id: 'RANGE' },
     },
+  'operations':
+    {
+      FileOptions: { map: true },
+      Schema: {
+        id: 'S',
+        createdBy: 'S',
+        createTime: 'S',
+      },
+      KeySchema: { createdBy: 'HASH', id: 'RANGE' },
+    },
   'cull':
     {
       FileOptions: { map: true },
