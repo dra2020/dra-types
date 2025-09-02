@@ -118,3 +118,50 @@ export function datasetRestrict(ds: Dataset): { [key: string]: boolean }
 
 // Index of database records
 export type DatasetIndex = { [id: string]: Dataset };
+
+export interface PrimaryKeys { CENSUS: string, VAP: string, ELECTION: string };
+export function defaultBuiltinKeys(state: string, datasource: string, planType: string, builtins: Set<string>): PrimaryKeys
+{
+  function bestOf(a: string[]): string { return a.find(s => builtins.has(s)) }
+
+  return (datasource === '2020_VD')
+    ? {
+        CENSUS:   bestOf((usesPrisonerAdjust(state, datasource, planType)
+                          ? ['D20FA', 'D20F', 'D19F', 'D18F']
+                          : ['D20F', 'D19F', 'D18F'])),
+        VAP:      bestOf(['D20T', 'D19T', 'D18T']),
+        ELECTION: bestOf(['C16GCO', 'E20GPR', 'E16GPR'])
+      }
+    :
+      {
+        CENSUS:   bestOf(['D10F', 'D16F']),
+        VAP:      bestOf(['D10T', 'D16T']),
+        ELECTION: bestOf(['C16GCO', 'E20GPR', 'E16GPR', 'E08GPR'])
+      }
+}
+
+// Hard-coded based on both the existence of the dataset and the legal requirements of that particular state
+// (e.g. NY uses for state house maps but not congressional maps). So that is why we hard-code rather than
+// derive from dataset metadata.
+//
+export function usesPrisonerAdjust(state: string, datasource: string, planType: string): boolean
+{
+  if (datasource !== '2020_VD') return false;
+  switch (state)
+  {
+    case 'CA':
+    case 'DE':
+    case 'MD':
+    case 'NJ':
+    case 'NV':
+    case 'PA':
+    case 'VA':
+    case 'WA':
+      return (planType === 'congress' || planType === 'upper' || planType === 'lower' || planType === 'coi');
+    case 'CO':
+    case 'CT':
+    case 'NY':
+      return (planType === 'upper' || planType === 'lower' || planType === 'coi');
+  }
+  return false;
+}
