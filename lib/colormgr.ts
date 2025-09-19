@@ -122,6 +122,10 @@ export let EthnicFewStops = [
   1.00,  // 
 ];
 
+export const ColorBrewerSchemeStops = [
+  0.00, 0.125, 0.125, 0.25, 0.25, 0.375, 0.375, 0.50, 0.50, 0.625, 0.625, 0.75, 0.75, 0.875, 0.875, 1.00
+];
+
 export type PaletteDefaults = { [key: string]: string };
 export const DefaultPaletteDefaults: PaletteDefaults = {
   partisanScale: 'partisanclassic',
@@ -140,23 +144,28 @@ export function makeStops(stops: number[], colors: string[]): Util.Stop[]
   return result;
 }
 
-function partisanStops(stops: number[], pd: PaletteDefaults): Util.Stop[]
+// *************** Color functions ***********************
+// These 3 functions: partisanStops, partisanDistrictStops, ethnicStops, check for Color Brewer schemes
+export function partisanStops(stops: number[], palette: PaletteName): Util.Stop[]
 {
-  const palette: PaletteName = pd['partisanScale'] as PaletteName;
+  if (Colors.BigPalettes.indexOf(palette) < 0)   // not a big palette
+    stops = ColorBrewerSchemeStops;
   return makeStops(stops, colorsFromStopsPartisan(palette, 'partisanScale', stops));
 }
 
-function partisanDistrictStops(stops: number[], pd: PaletteDefaults): Util.Stop[]
+export function partisanDistrictStops(stops: number[], palette: PaletteName): Util.Stop[]
 {
-  const palette: PaletteName = pd['partisanDistrictsScale'] as PaletteName;
+  if (Colors.BigPalettes.indexOf(palette) < 0)   // not a big palette
+    stops = ColorBrewerSchemeStops;
   return makeStops(stops, colorsFromStopsPartisan(palette, 'partisanDistrictsScale', stops));
 }
 
-function ethnicStops(stops: number[], pd: PaletteDefaults): Util.Stop[]
+export function ethnicStops(stops: number[], palette: PaletteName): Util.Stop[]
 {
-  const palette: PaletteName = pd['demographicsScale'] as PaletteName;
   if (palette === 'demographicsclassic')
     return makeStops(stops, Colors.EthnicFewClassicColors);
+  if (Colors.BigPalettes.indexOf(palette) < 0)   // not a big palette
+    stops = ColorBrewerSchemeStops;
   return makeStops(stops, colorsFromStops(palette, stops, Colors.EthnicFewClassicColors));
 }
 
@@ -179,12 +188,12 @@ export function ToAllEthnicColor(agg: PF.PackedFields, dc: PF.DatasetContext, pd
 
 export function ToPartisanColorStr(agg: PF.PackedFields, dc: PF.DatasetContext, pd: PaletteDefaults): string
 {
-  return ToPartisanColor(agg, dc, partisanStops(PartisanPrecinctStops, pd));
+  return ToPartisanColor(agg, dc, partisanStops(PartisanPrecinctStops, pd['partisanScale']));
 }
 
 export function ToPartisanDistrictColor(agg: PF.PackedFields, dc: PF.DatasetContext, pd: PaletteDefaults): string
 {
-  return ToPartisanColor(agg, dc, partisanDistrictStops(PartisanDistrictStops, pd));
+  return ToPartisanColor(agg, dc, partisanDistrictStops(PartisanDistrictStops, pd['partisanDistrictsScale']));
 }
 
 function ToPartisanColor(agg: PF.PackedFields, dc: PF.DatasetContext, stops: Util.GradientStops): string
@@ -206,7 +215,7 @@ export function ToPartisanShiftColor(agg: PF.PackedFields, dc: PF.DatasetContext
   
   const rep: number = 0.5 - (shift / 2);
   const dem: number = 0.5 + (shift / 2);
-  const stops: Util.GradientStops = defaultIsDistrict ? partisanDistrictStops(PartisanDistrictStops, pd) : partisanStops(PartisanPrecinctStops, pd);
+  const stops: Util.GradientStops = defaultIsDistrict ? partisanDistrictStops(PartisanDistrictStops, pd['partisanDistrictsScale']) : partisanStops(PartisanPrecinctStops, pd['partisanScale']);
   const color: string = ColorFromRGBPcts(rep, 0, dem, stops);
   // console.log('Shift (r, d, color): (' + rep + ', ' + dem + ', ' + color + ')');
   return color;
@@ -246,7 +255,7 @@ export function ToEthnicColorStr(agg: PF.PackedFields, dc: PF.DatasetContext, pd
   if (den == 0)
     return '#ffffff';
   const pct = bInvert ? 1 - (num / den) : num / den;
-  return Util.execGradient(ethnicStops(EthnicFewStops, pd), pct);
+  return Util.execGradient(ethnicStops(EthnicFewStops, pd['demographicsScale']), pct);
 }
 
 // All Groups Mosaic
@@ -377,15 +386,22 @@ export function ColorFromRGBPcts(pctRed: number, pctGreen: number, pctBlue: numb
 
 export type ColorUse = 'districts' | 'partisanScale' | 'demographicsScale' | 'demographicsAllGroups' | 'partisanDistrictsScale';
 
-// Currently supported palettes
+// Currently supported palettes (not including Color Brewer schemes)
 export const PaletteNames = ['jet_r', 'turbo_r', 'inferno_r', 'viridis_r', 'magma_r', 'plasma_r', 'Greys', 'bone_r',
   'draclassic', 'demographicsclassic', 'partisanclassic', 'allgroupsclassic', 'partisandistrictsclassic'] as const;
-export type PaletteName = typeof PaletteNames[number];
+export type PaletteName = string;   //typeof PaletteNames[number];    // This can be a base palette name or the name of a color scheme
 
-export function colorsFromStops(palette: PaletteName, stops: number[], classicColors: string[]): string[]
+function colorsFromStops(palette: PaletteName, stops: number[], classicColors: string[]): string[]
 {
-  // Use classicColors to see where there are duplicate colors
   const allColors: string[] = Colors.getPalette(palette);
+  if (allColors.length < Colors.MaxColors)
+  {
+    if (allColors.length != 8)  // Color Brewer Schemes are only 8 colors
+      return classicColors;     // Safety check; shouldn't happen
+    return colorBrewerColors(stops, allColors);
+  }
+
+  // Use classicColors to see where there are duplicate colors
   let colors: string[] = [];
   for (let i = 0; i < stops.length; i++)
   {
@@ -400,7 +416,7 @@ export function colorsFromStops(palette: PaletteName, stops: number[], classicCo
   return colors;
 }
 
-export function colorsFromStopsPartisan(palette: PaletteName, colorUse: ColorUse, stops: number[]): string[]
+function colorsFromStopsPartisan(palette: PaletteName, colorUse: ColorUse, stops: number[]): string[]
 {
   if (palette === 'partisanclassic')
     return Colors.PartisanPrecinctClassicColors;
@@ -410,15 +426,31 @@ export function colorsFromStopsPartisan(palette: PaletteName, colorUse: ColorUse
   // For partisanScale and partisanDistrictsScale; indexes match classic color pattern
   const allColors: string[] = Colors.getPalette(palette);
   if (allColors.length < Colors.MaxColors)
-    return Colors.PartisanPrecinctClassicColors;      // Safety check; shouldn't happen
+  {
+    if (allColors.length != 8)  // Color Brewer Schemes are only 8 colors
+      return Colors.PartisanPrecinctClassicColors;      // Safety check; shouldn't happen
+    return colorBrewerColors(stops, allColors);
+  }
 
   let colors: string[] = [];
-
   const indexes: number[] = colorUse === 'partisanScale' ?
     [15, 27, 37, 47, 57, 67, 82, 92, 102, 112, 122, 134] : [15, 15, 37, 37, 47, 67, 82, 102, 122, 122, 134, 134];
   for (let i = 0; i < stops.length; i++)
-  {
     colors.push(allColors[indexes[i]]);
+
+  return colors;
+}
+
+function colorBrewerColors(stops: number[], allColors: string[]): string[]
+{
+  // Do each color twice (expecting 16 stops)
+  const colors: string[] = [];
+  for (let i = 0; i < stops.length; i++)
+  {
+    let colorInx = Math.floor(i / 2);
+    if (colorInx >= allColors.length)
+      colorInx = allColors.length - 1;
+    colors.push(allColors[colorInx]);
   }
   return colors;
 }
