@@ -148,14 +148,14 @@ export function makeStops(stops: number[], colors: string[]): Util.Stop[]
 // These 3 functions: partisanStops, partisanDistrictStops, ethnicStops, check for Color Brewer schemes
 export function partisanStops(stops: number[], palette: PaletteName): Util.Stop[]
 {
-  if (Colors.BigPalettes.indexOf(palette) < 0)   // not a big palette
+  if (Colors.ColorBrewerSchemeNames.indexOf(palette) >= 0)   // Color Brewer scheme
     stops = ColorBrewerSchemeStops;
   return makeStops(stops, colorsFromStopsPartisan(palette, 'partisanScale', stops));
 }
 
 export function partisanDistrictStops(stops: number[], palette: PaletteName): Util.Stop[]
 {
-  if (Colors.BigPalettes.indexOf(palette) < 0)   // not a big palette
+  if (Colors.ColorBrewerSchemeNames.indexOf(palette) >= 0)   // Color Brewer scheme
     stops = ColorBrewerSchemeStops;
   return makeStops(stops, colorsFromStopsPartisan(palette, 'partisanDistrictsScale', stops));
 }
@@ -164,7 +164,7 @@ export function ethnicStops(stops: number[], palette: PaletteName): Util.Stop[]
 {
   if (palette === 'demographicsclassic')
     return makeStops(stops, Colors.EthnicFewClassicColors);
-  if (Colors.BigPalettes.indexOf(palette) < 0)   // not a big palette
+  if (Colors.ColorBrewerSchemeNames.indexOf(palette) >= 0)   // Color Brewer scheme
     stops = ColorBrewerSchemeStops;
   return makeStops(stops, colorsFromStops(palette, stops, Colors.EthnicFewClassicColors));
 }
