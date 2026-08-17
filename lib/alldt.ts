@@ -14,3 +14,6 @@ export * from './groups';
 export * from './datasets';
 export * from './precincts';
 export * from './cities';
+export * from './multistate';
+export * from './statecontiguity';
+export * from './statename';

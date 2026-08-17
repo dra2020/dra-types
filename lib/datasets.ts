@@ -1,4 +1,5 @@
 import * as G from './groups';
+import { isMultiState, baseStatesOf } from './multistate';
 
 // For use in UI. Keys are used in JSON.
 export interface DatasetField
@@ -147,6 +148,10 @@ export function defaultBuiltinKeys(state: string, datasource: string, planType: 
 export function usesPrisonerAdjust(state: string, datasource: string, planType: string): boolean
 {
   if (datasource !== '2020_VD') return false;
+  // A combined multi-state census must apply prisoner adjustment uniformly, so only use it when every
+  // member state does (baseStatesOf returns [state] for a single state — unchanged behavior there).
+  if (isMultiState(state))
+    return baseStatesOf(state).every(s => usesPrisonerAdjust(s, datasource, planType));
   switch (state)
   {
     case 'CA':

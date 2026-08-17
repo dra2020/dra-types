@@ -243,7 +243,7 @@ export type ExtBlockCardinality = Map<string, number>;
 
 export function pushExtPackedFields(blocks: string[], pf: PackedFields, did: string, index: PackedMetaIndex, data: ExtPackedFields, card: ExtBlockCardinality): void
 {
-  if (!blocks)
+  if (!blocks || blocks.length == 0)
     return;
   if (! pf)
     throw('pushExtPackedFields: packed fields should be initialized before push');
@@ -251,6 +251,8 @@ export function pushExtPackedFields(blocks: string[], pf: PackedFields, did: str
     throw('pushExtPackedFields: packed fields and block cardinality do not match');
   if (pf.data[did])
     return; // already pushed
+  if (! card.has(blocks[0]))
+    return; // dataset not for this feature (multi-state support with cross-state features)
   let nfields = data[1];
   let pfa = allocPackedFieldsArray(nfields+1);  // field count
   pfa[0] = 0;

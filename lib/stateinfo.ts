@@ -1,4 +1,5 @@
 import * as DT from './dra-types';
+import { isMultiState, baseStatesOf } from './multistate';
 
 export interface StateYearInfo
 {
@@ -86,6 +87,12 @@ export function hasPlanType(stateCode: string, planType: DT.PlanType, is2020?: b
   if (planType === 'county' || planType === 'city')
     return false;
 
+  // A multi-state region has the plan type if any member does (e.g. "has lower" when a unicameral
+  // member is combined with a bicameral one; "has congress" since the combined region always spans
+  // more than one district).
+  if (isMultiState(stateCode))
+    return baseStatesOf(stateCode).some(s => hasPlanType(s, planType, is2020));
+
   return true;
 }
 
@@ -98,12 +105,18 @@ export function getPlanDistrictCount(stateCode: string, planType: DT.PlanType, d
 {
   if (planType === 'coi')
     return 1;
+  // A multi-state region's district count is the sum of its members' counts (total CDs / legislative
+  // seats across the combined region). baseStatesOf returns [stateCode] for a single state, but we
+  // only recurse for the multi case to keep the single-state path allocation-free.
+  if (isMultiState(stateCode))
+    return baseStatesOf(stateCode).reduce((sum, s) => sum + getPlanDistrictCount(s, planType, datasource), 0);
   if (datasource === '2016_BG')
     datasource = '2010_VD';
   if ((datasource !== '2010_VD' && datasource !== '2020_VD') || (planType !== 'congress' && planType !== 'upper' && planType !== 'lower'))
     return 0;
-  
-  const stateYearInfo: StateYearInfo = StatePlanInfoMap[stateCode][datasource as ('2010_VD' | '2020_VD')];
+
+  const stateInfo: StateInfo = StatePlanInfoMap[stateCode];
+  const stateYearInfo: StateYearInfo = stateInfo ? stateInfo[datasource as ('2010_VD' | '2020_VD')] : undefined;
   return stateYearInfo && stateYearInfo[planType] ? stateYearInfo[planType]['nDistricts'] : 0;
 }
 
@@ -115,7 +128,12 @@ export function getStateYearTotalPop(stateCode: string, datasource: string): num
   if ((datasource !== '2010_VD' && datasource !== '2020_VD'))
     return 0;
 
-  const stateYearInfo: StateYearInfo = StatePlanInfoMap[stateCode][datasource as ('2010_VD' | '2020_VD')];
+  // A multi-state region's population is the sum of its members' populations.
+  if (isMultiState(stateCode))
+    return baseStatesOf(stateCode).reduce((sum, s) => sum + getStateYearTotalPop(s, datasource), 0);
+
+  const stateInfo: StateInfo = StatePlanInfoMap[stateCode];
+  const stateYearInfo: StateYearInfo = stateInfo ? stateInfo[datasource as ('2010_VD' | '2020_VD')] : undefined;
   return stateYearInfo ? stateYearInfo['population'] : 0;
 }
 
