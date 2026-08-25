@@ -240,9 +240,9 @@ export function blockmapToState(blockMap: BlockMapping): string
   return null;
 }
 
-export function blockmapToVTDmap(blockMap: BlockMapping, mbm: G.MultiBlockMapping, altBlocks: AltBlockMapping): ConvertResult
+export function blockmapToVTDmap(blockMap: BlockMapping, mbm: G.MultiBlockMapping, altBlocks: AltBlockMapping, bSpansStates?: boolean): ConvertResult
 {
-  return blockmapToVTDmapCustom(blockMap, mbm, mbm, altBlocks);
+  return blockmapToVTDmapCustom(blockMap, mbm, mbm, altBlocks, bSpansStates);
 }
 
 // blockToVTD:
@@ -252,14 +252,18 @@ export function blockmapToVTDmap(blockMap: BlockMapping, mbm: G.MultiBlockMappin
 //  districtIDs that were used by the file.
 //
 //  The state (as specified by the first two digits of the GEOID) is also determined. If the GEOID's do
-//  not all specify the same state, the mapping is considered invalid and the outValid flag is set to false.
+//  not all specify the same state, the mapping is considered invalid and the outValid flag is set to false —
+//  unless `bSpansStates` is set, which is the case for a multi-state ("+NJ+NY") map, where a file covering
+//  several states is exactly what is expected. `outState` then reports the state of the first geoid seen
+//  and callers must not treat it as the state of the whole file.
 //
 
 export function blockmapToVTDmapCustom(
   blockMap: BlockMapping,
   inMbm: G.MultiBlockMapping,
   outMbm: G.MultiBlockMapping,
-  altBlocks: AltBlockMapping): ConvertResult
+  altBlocks: AltBlockMapping,
+  bSpansStates?: boolean): ConvertResult
 {
   let res: ConvertResult = {
       inBlockMap: blockMap,
@@ -322,7 +326,7 @@ export function blockmapToVTDmapCustom(
     let state = geoidToState(id);
     if (res.outState == null)
       res.outState = state;
-    else if (res.outState !== state)
+    else if (res.outState !== state && ! bSpansStates)
     {
       res.outValid = false;
       break;
