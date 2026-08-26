@@ -89,6 +89,12 @@ export let Schemas: any = {
         xprops: 'M',
       },
       KeySchema: { id: 'HASH' },
+      // Expunging a user's data queries this table by createdBy. Without the index that query
+      // degrades to a full table scan (see DynamoCollection.toInternalQuery, which drops a filter it
+      // cannot satisfy) - 1.4M records read to find the handful belonging to one user.
+      GlobalSecondaryIndexes: [
+          { createdBy: 'HASH' },
+        ],
     },
   'splitblock':
     {
