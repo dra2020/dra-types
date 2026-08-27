@@ -12,3 +12,5 @@ export { DX }
 export * from './multistate';
 export * from './statecontiguity';
 export * from './statename';
+export * from './scoreversion';
+export * from './allstate';

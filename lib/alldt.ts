@@ -15,5 +15,7 @@ export * from './datasets';
 export * from './precincts';
 export * from './cities';
 export * from './multistate';
+export * from './scoreversion';
+export * from './allstate';
 export * from './statecontiguity';
 export * from './statename';
