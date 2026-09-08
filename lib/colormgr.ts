@@ -127,7 +127,12 @@ export const ColorBrewerSchemeStops = [
 ];
 
 export type PaletteDefaults = { [key: string]: string };
+
+// One entry per ColorUse below. 'districts' was the late addition - district colors began as a
+// per-map setting (meta 'palette') with no user-level or system-level default behind it - and its
+// absence here left every consumer to invent its own fallback, or to crash for want of one.
 export const DefaultPaletteDefaults: PaletteDefaults = {
+  districts: 'draclassic',
   partisanScale: 'partisanclassic',
   partisanDistrictsScale: 'partisandistrictsclassic',
   demographicsScale: 'demographicsclassic',
