@@ -157,6 +157,20 @@ export let Schemas: any = {
       },
       KeySchema: { createdBy: 'HASH', id: 'RANGE' },
     },
+  // Keyed the same way as sharedwithme and for the same reason: one row per (user, dataset), with
+  // createdBy as the partition key so the per-user query is native and needs no secondary index. A
+  // row only ever exists as an exception to the dataset's default show value.
+  'showdataset':
+    {
+      FileOptions: { map: true },
+      Schema: {
+        id: 'S',
+        createdBy: 'S',
+        show: 'BOOL',
+        deleted: 'BOOL',
+      },
+      KeySchema: { createdBy: 'HASH', id: 'RANGE' },
+    },
   'access':
     {
       FileOptions: { map: true, noobject: true },
