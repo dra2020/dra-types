@@ -19,3 +19,4 @@ export * from './scoreversion';
 export * from './allstate';
 export * from './statecontiguity';
 export * from './statename';
+export * from './sharedwithme';

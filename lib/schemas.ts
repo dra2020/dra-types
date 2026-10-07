@@ -140,6 +140,23 @@ export let Schemas: any = {
         splits: 'L',
       },
     },
+  // One row per (user, access id) for the "Shared with Me" list. Keyed like the 'state' table -
+  // createdBy as the partition key, id as the range - rather than by id alone, because a share link
+  // is ONE access id used by many users (access.userIDs is empty in the live path), so id is not
+  // unique: in a 400-user production sample, 631 of 3,515 access ids appeared for more than one user
+  // and the worst was shared by 39. Making createdBy the partition key also makes the per-user query
+  // native, so no secondary index is needed.
+  'sharedwithme':
+    {
+      FileOptions: { map: true },
+      Schema: {
+        id: 'S',
+        createdBy: 'S',
+        modifyTime: 'S',
+        deleted: 'BOOL',
+      },
+      KeySchema: { createdBy: 'HASH', id: 'RANGE' },
+    },
   'access':
     {
       FileOptions: { map: true, noobject: true },
