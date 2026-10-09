@@ -160,6 +160,27 @@ export let Schemas: any = {
   // Keyed the same way as sharedwithme and for the same reason: one row per (user, dataset), with
   // createdBy as the partition key so the per-user query is native and needs no secondary index. A
   // row only ever exists as an exception to the dataset's default show value.
+  // Enforces one account per email address.
+  //
+  // The users table is keyed by id and finds an account by email through a GSI, and GSIs are
+  // EVENTUALLY consistent - DynamoDB does not even allow a consistent read on one. So the signup
+  // check "is this email taken?" can legitimately answer no for an address written moments earlier,
+  // and two signups close together both pass it and both create an account. This table is the
+  // atomic gate: email is the partition key of a base table, so a conditional write against it is
+  // decided under the item's own lock, with no index lag to race.
+  //
+  // Deliberately NOT backfilled from users: the GSI check in front of it is reliable for anything
+  // written more than a moment ago, so this only has to cover the hot window.
+  'emailclaim':
+    {
+      FileOptions: { map: true },
+      Schema: {
+        email: 'S',
+        id: 'S',
+        createTime: 'S',
+      },
+      KeySchema: { email: 'HASH' },
+    },
   'showdataset':
     {
       FileOptions: { map: true },
