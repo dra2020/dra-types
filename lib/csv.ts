@@ -35,8 +35,13 @@ export function canonicalDistrictID(districtID: string): string
 function reverseSubMapping(mbm: G.MultiBlockMapping, n: number): G.ReverseBlockMapping
 {
   let rev: any = {};
+  // Every entry, not just the first: a multi-state mapping has one per state. A block also mapped by an
+  // override entry is seen more than once, so skip repeats.
+  let seen = new Set<string>();
 
-  mbm.forEach(blockid => {
+  mbm.forEachBlock(blockid => {
+      if (seen.has(blockid)) return;
+      seen.add(blockid);
       let geoid = blockid.substr(0, n);
       if (! rev[geoid]) rev[geoid] = [];
       rev[geoid].push(blockid);
