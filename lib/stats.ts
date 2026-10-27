@@ -105,6 +105,17 @@ export function statRateRollover(sr: StatRate, period: number): void
   }
 }
 
+// Stat names come from the index objects themselves, and some indices (client logs) come from
+// untrusted request bodies. A JSON-parsed name like "__proto__" would otherwise write through to
+// Object.prototype for the whole process.
+function isUsableEntry(si: StatEntryIndex, p: string): boolean
+{
+  if (p === '__proto__' || p === 'constructor' || p === 'prototype') return false;
+  if (! Object.prototype.hasOwnProperty.call(si, p)) return false;
+  let se = si[p];
+  return se != null && typeof se === 'object' && ! Array.isArray(se);
+}
+
 export function statEntryIndexMerge(accum: StatEntryIndex, si: StatEntryIndex): StatEntryIndex
 {
   if (accum == null) accum = {};
@@ -114,6 +125,7 @@ export function statEntryIndexMerge(accum: StatEntryIndex, si: StatEntryIndex): 
 
   // But merge in all the other values
   Object.keys(si).forEach((p: string) => {
+      if (! isUsableEntry(si, p)) return;
       let se = si[p];
       if (se.valType == ValTypeRate)
         accum[p] = se;
@@ -192,7 +204,9 @@ export function statRateAccum(accum: StatRate, sr: StatRate): StatRate
 export function statIndexAccum(accum: StatEntryIndex, si: StatEntryIndex): StatEntryIndex
 {
   if (accum == null) accum = {};
+  if (si == null || typeof si !== 'object') return accum;
   Object.keys(si).forEach((p: string) => {
+      if (! isUsableEntry(si, p)) return;
       let se = si[p];
       if (se.valType == ValTypeRate)
         accum[p] = statRateAccum(accum[p] as StatRate, se as StatRate);
