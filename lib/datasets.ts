@@ -141,6 +141,29 @@ export function defaultBuiltinKeys(state: string, datasource: string, planType: 
       }
 }
 
+// The same choice as defaultBuiltinKeys, but without the prisoner-adjusted census: every state that has
+// D20F gets D20F, whatever its own maps are measured by. Scoring always flattens these onto the district
+// shapes, alongside the map's own primaries, so that any set of shapes - and so any map collection built
+// from them - has at least one set of datasets in common, rather than D20FA from some states and D20F
+// from others.
+export function baseBuiltinKeys(state: string, datasource: string, planType: string, builtins: Set<string>): PrimaryKeys
+{
+  function bestOf(a: string[]): string { return a.find(s => builtins.has(s)) }
+
+  return (datasource === '2020_VD')
+    ? {
+        CENSUS:   bestOf(['D20F', 'D19F', 'D18F']),
+        VAP:      bestOf(['D20T', 'D19T', 'D18T']),
+        ELECTION: bestOf(['C16GCO', 'E20GPR', 'E16GPR'])
+      }
+    :
+      {
+        CENSUS:   bestOf(['D10F', 'D16F']),
+        VAP:      bestOf(['D10T', 'D16T']),
+        ELECTION: bestOf(['C16GCO', 'E20GPR', 'E16GPR', 'E08GPR'])
+      }
+}
+
 // Hard-coded based on both the existence of the dataset and the legal requirements of that particular state
 // (e.g. NY uses for state house maps but not congressional maps). So that is why we hard-code rather than
 // derive from dataset metadata.

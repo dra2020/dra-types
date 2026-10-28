@@ -28,9 +28,14 @@
 //   place - the shapes have to be rebuilt from the blockmap - so it needs a rescore even though
 //   nothing would look missing from its property set.
 //
+// '8' always flattens the base builtin datasets (DT.baseBuiltinKeys - D20F/D20T and the default
+//   election on 2020_VD) alongside whatever the map itself carries. Before this a map in a prisoner-
+//   adjusted state that never used D20F had no D20F aggregates, so a collection spanning it and an
+//   unadjusted state shared no census dataset and could only show one as a composite.
+//
 // Shapes are re-scored on demand when a consumer finds them below the version it needs; nothing
 // sweeps the fleet on a bump.
-export const ScoreVersion = '7';
+export const ScoreVersion = '8';
 
 /**
  * The version at which per-district dataset aggregates appeared - NOT the current version.
@@ -64,6 +69,14 @@ export const ScoreVersionAllDatasets = '6';
  * not turn into a forced rescore for consumers that only need correct border geometry.
  */
 export const ScoreVersionShapeMerge = '7';
+
+/**
+ * The version from which the base builtin datasets (see baseBuiltinKeys) are always flattened.
+ *
+ * Like ScoreVersionShapeMerge, a version gate rather than a content test: a blob below it may happen to
+ * carry the base datasets because the map used them, but only from here on is it guaranteed.
+ */
+export const ScoreVersionBaseDatasets = '8';
 
 /** Names, within a collection's `datasets` descriptor, of the datasets a map treats as primary. */
 export interface ShapePrimaryDatasets
@@ -103,6 +116,12 @@ export function scoreHasAllDatasets(col: any): boolean
 export function scoreHasMergedShapes(col: any): boolean
 {
   return scoreAtLeast(col, ScoreVersionShapeMerge);
+}
+
+/** True if a district-shape collection is guaranteed to carry the base builtin datasets. */
+export function scoreHasBaseDatasets(col: any): boolean
+{
+  return scoreAtLeast(col, ScoreVersionBaseDatasets);
 }
 
 /**
